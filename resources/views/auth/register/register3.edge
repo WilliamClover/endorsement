@@ -1,0 +1,51 @@
+@layout('layout.no_auth')
+@section('css')
+{{ style('assets/css/intlTelInput') }}
+@endsection
+@section('content')
+<div class="card">
+  <div class="card-body">
+    <h6 class="card-title mt-4 mb-5">Add your account details</h6>
+    <div class="registeredTabs">
+      <a><small>User&nbsp;Details</small></a>
+      <a><small>OTP</small></a>
+      <a class="current"><small>Account&nbsp;Details</small></a>
+    </div>
+    <div class="my-4">
+
+      <form action="{{ route('register3') }}" method="post">
+        {{ csrfField() }}
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control form-control-lg {{ hasErrorFor('email') ? 'is-danger' : '' }}"
+            name="email" value="{{ old('email', '') }}" placeholder="Enter your email">
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('email'), hasErrorFor('email')) }}
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control form-control-lg {{ hasErrorFor('password') ? 'is-danger' : '' }}"
+            name="password" value="{{ old('password', '') }}" placeholder="Enter a Password" />
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('password'), hasErrorFor('password')) }}
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password"
+            class="form-control form-control-lg {{ hasErrorFor('password_confirmation') ? 'is-danger' : '' }}"
+            name="password_confirmation" value="{{ old('password_confirmation', '') }}"
+            placeholder="Confirm your password">
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('password_confirmation'), hasErrorFor('password_confirmation')) }}
+        </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-lg btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+@endsection
+
+
+@section('javascript')
+@endsection

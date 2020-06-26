@@ -1,0 +1,49 @@
+<ul class="sidebar-nav">
+    <li class="sidebar-header">
+        Pages
+    </li>
+
+    <li class="sidebar-item active">
+        <a href="/" class="sidebar-link">
+            <i class="align-middle" data-feather="layout"></i> <span class="align-middle">Dashboard</span>
+        </a>
+    </li>
+
+    @if(auth.user.is_admin==1)
+    <li class="sidebar-item">
+        <a href="#administrator" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Administrator</span>
+        </a>
+        <ul id="administrator" class="sidebar-dropdown list-unstyled collapse" data-parent="#sidebar">
+            <li class="sidebar-item"><a class="sidebar-link" href="/admin/registered/">Registered Users</a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    <li class="sidebar-item">
+        <a href="#endorsement" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle" data-feather="check-square"></i> <span class="align-middle">Endorsement</span>
+        </a>
+        <ul id="endorsement" class="sidebar-dropdown list-unstyled collapse" data-parent="#sidebar">
+            <li class="sidebar-item"><a class="sidebar-link" href="/endorsement/mypolicies">My List of Policies</a>
+            <li class="sidebar-item"><a class="sidebar-link" href="/endorsement/myRequests">My Requests</a>
+            <li class="sidebar-item"><a class="sidebar-link" href="/endorsement/addAMember">Add a member</a>
+            <li class="sidebar-item"><a class="sidebar-link" href="/endorsement/deleteAMember">Delete a member</a>
+            </li>
+        </ul>
+    </li>
+
+</ul>
+<div class="sidebar-bottom d-none d-lg-block">
+    <div class="media">
+        <img class="rounded-circle mr-3" src="/assets/img/new_logo.png" alt="{{auth.user.firstname}}" width="40"
+            height="40">
+        <div class="media-body">
+            <h5 class="mb-1">{{auth.user.firstname}} {{auth.user.lastname}}</h5>
+            <div>
+                <i class="fas fa-circle text-success"></i> Online
+            </div>
+        </div>
+    </div>
+</div>

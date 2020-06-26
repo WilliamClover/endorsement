@@ -1,0 +1,31 @@
+<table id="datatables-reponsive" class="table table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Name</th>
+            <th>Relation</th>
+            <th>Gender</th>
+            <th>Nationality</th>
+            <th>Marital Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @each(data in step2Data)
+        <tr>
+            <td>{{data.company_name}}</td>
+            <td>{{data.first_name}} {{data.last_name}}</td>
+            <td>{{data.relation}}</td>
+            <td>{{data.gender}}</td>
+            <td>{{data.nationality}}</td>
+            <td>{{data.marital_status}}</td>
+            <td><a href="javascript:;"><i class="align-middle mr-2 fas fa-fw fa-upload" data-toggle="tooltip"
+                        data-placement="top" title="Upload Document"></i></a></td>
+        </tr>
+        @endeach
+
+    </tbody>
+</table>
+<script>
+
+</script>

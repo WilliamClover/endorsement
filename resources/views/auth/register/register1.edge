@@ -1,0 +1,78 @@
+@layout('layout.no_auth')
+@section('css')
+{{ style('assets/css/intlTelInput') }}
+@endsection
+@section('content')
+<div class="card">
+  <div class="card-body">
+    <h6 class="card-title mt-4 mb-5">Create your Clover account</h6>
+    <div class="registeredTabs">
+      <a class="current"><small>User&nbsp;Details</small></a>
+      <a><small>OTP</small></a>
+      <a><small>Account&nbsp;Details</small></a>
+    </div>
+    <div class="my-4">
+
+      <form action="{{ route('register') }}" method="post">
+        {{ csrfField() }}
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" class="form-control form-control-lg {{ hasErrorFor('firstname') ? 'is-danger' : '' }}"
+            name="firstname" value="{{ old('firstname', '') }}" placeholder="Enter your name" />
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('firstname'), hasErrorFor('firstname')) }}
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" class="form-control form-control-lg {{ hasErrorFor('lastname') ? 'is-danger' : '' }}"
+            name="lastname" value="{{ old('lastname', '') }}" placeholder="Enter your lastname" />
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('lastname'), hasErrorFor('lastname')) }}
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" class="form-control form-control-lg {{ hasErrorFor('phonenumber') ? 'is-danger' : '' }}"
+            id="phone" name="phone" value="{{ old('phone', '') }}" />
+          {{ elIf('<span class="help is-danger invalid-feedback d-block p-0">$self</span>', getErrorFor('phonenumber'), hasErrorFor('phonenumber')) }}
+        </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-lg btn-primary">Next</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+@endsection
+
+
+@section('javascript')
+{{ script('assets/js/intlTelInput') }}
+<script>
+  var input = document.querySelector("#phone");
+  window.intlTelInput(input, {
+    // allowDropdown: false,
+    // autoHideDialCode: false,
+    // autoPlaceholder: "off",
+    // dropdownContainer: document.body,
+    // excludeCountries: ["us"],
+    // formatOnDisplay: false,
+    initialCountry: "auto",
+    geoIpLookup: function(success, failure) {
+      //You can remove the token
+      $.get("https://ipinfo.io?token=ea0a74dcb6016f", function() {}, "jsonp").always(function(resp) {
+        var countryCode = (resp && resp.country) ? resp.country : "";
+        success(countryCode);
+      });
+    },
+    hiddenInput: "phonenumber",
+    //localizedCountries: { 'de': 'Deutschland' },
+    // nationalMode: false,
+    // onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
+    // placeholderNumberType: "MOBILE",
+     preferredCountries: ['lb', 'jo', 'ae', 'qa', 'om', 'eg', 'bh', 'kw'],
+     separateDialCode: true,
+    utilsScript: "assets/js/utils.js",
+  });
+  
+</script>
+@endsection

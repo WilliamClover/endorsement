@@ -1,0 +1,567 @@
+@layout('layout.app')
+@section('css')
+<link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+<style>
+    .handsontable tbody th,
+    .handsontable thead th,
+    .handsontable tbody th.ht__active_highlight,
+    .handsontable thead th.ht__active_highlight {
+        background-color: #696969;
+        color: #fff;
+    }
+
+    .text-error {
+        color: #ff4c42
+    }
+
+    #arrows-success-step-2 {
+        overflow-y: hidden;
+    }
+</style>
+@endsection
+@section('content')
+
+<h1 class="h3 mb-3">Addition</h1>
+<div class="row">
+
+    <div class="col-12">
+        <div id="smartwizard-arrows-success" class="wizard wizard-success mb-4">
+            <ul>
+                <li><a href="#arrows-success-step-1">Step 1<br /><small>Step description</small></a></li>
+                <li><a href="#arrows-success-step-2">Step 2<br /><small>Step description</small></a></li>
+                <li><a href="#arrows-success-step-3">Step 3<br /><small>Step description</small></a></li>
+                <li><a href="#arrows-success-step-4">Step 4<br /><small>Step description</small></a></li>
+            </ul>
+
+            <div>
+                <div id="arrows-success-step-1" class="">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <select class="selectMaster js-states form-control">
+                                <option></option>
+                                @each(master in masters)
+                                <option value="{{master.master}}">{{master.master}}</option>
+                                @endeach
+                            </select>
+                        </div>
+
+                        <div class="col-6">
+                            <select class="selectCOR js-states form-control">
+                                <option></option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <div id="arrows-success-step-2" class="">
+                    <div style="resize: vertical; height: 300px; ">
+                        <div style="height: 100%; overflow-x: auto;overflow-y:hidden;">
+                            <div id="example"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="arrows-success-step-3" class="">
+
+                </div>
+                <div id="arrows-success-step-4" class="">
+                    Step Content 4
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+
+
+@section('javascript')
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var validatedHot=false;
+        var globalStepIndex=0
+        var cor = "";
+        var master = "";
+        $("#smartwizard-arrows-success").smartWizard({
+            theme: "default",//arrows
+            showStepURLhash: false,
+            toolbarSettings:{
+                showPreviousButton:false,
+                showNextButton:false,
+                toolbarExtraButtons: [
+                $('<button></button>').text('Next Step').addClass('btn btn-info nextStepBtn')
+            ]
+            }
+        });
+        $(".nextStepBtn").hide() //hide next btn on load
+        ///////////////////////////STEP 1 start////////////////////////////
+        $(".selectMaster").val('').change();
+        $(".selectMaster").select2({
+            placeholder: "Select Master"
+        });
+        $('.selectMaster').on('change', function (e) {
+            master =$(this).val();
+            $(".selectCOR option").remove()
+            $.ajax({
+                    url: "{{ route('getCORFromMaster') }}",
+                    type: "get",
+                    data: {master:$(this).val()},
+                    success: function (res) {
+                        $(".selectCOR").append("<option></option>")
+                        $.each(res, function( index, value ) {
+                            $(".selectCOR").append("<option value='"+value.country +"'>"+value.country +"</option>")
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+        });
+
+        $(".selectCOR").select2({
+            placeholder: "Select Country of Residence"
+        });               
+        $('.selectCOR').on('change', function (e) {
+            cor =$(this).val();
+            $(".nextStepBtn").show()//show next btn on change cor in step 1
+        })
+        ///////////////////////////////////////NEXT STEPS//////////////////////////////
+        $("#smartwizard-arrows-success").on("showStep", function(e, anchorObject, stepIndex, stepDirection, stepPosition) {
+            globalStepIndex=stepIndex
+        });
+        $(".nextStepBtn").on('click', function (e) {
+            if(globalStepIndex==0){
+                $("#smartwizard-arrows-success").smartWizard("next");
+                handsOnTableForStep2(globalStepIndex,master,cor)
+                $(".nextStepBtn").addClass("disabled");
+            }else if(globalStepIndex==2){
+                $.get("{{ route('addAMemberStep4') }}", function( data ) {
+                    $("#arrows-success-step-4").html( data );
+                });
+                $(".nextStepBtn").text("Finish")
+            }
+        })
+    })
+    function handsOnTableForStep2(globalStepIndex,master,cor){
+            var notEmpty = function (value, callback) {
+                if (!value || String(value).length === 0) {
+                    $(".text-error").append("<p>The selected data field must not be empty</p>")
+                    callback(false);
+                } else {
+                    callback(true);
+                }
+            };
+            var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            var validEmail = function (value, callback) {
+                if (!value || regex.test(value) === false) {
+                    $(".text-error").append("<p>Please enter a valid email address</p>")
+                    callback(false);
+                } else {
+                    callback(true);
+                }
+            }
+        cor = cor.toUpperCase()
+        var contact={{{ toJSON(contact) }}}
+        var dataArray=[]
+        var colHeaderFromCOR=[
+                "Company Name",
+                "Shop or Site or Department",
+                "Employee Staff ID",
+                "First Name",
+                "Second Name",
+                "Family Name",
+                "Relation",
+                "DOB",
+                "Gender",
+                "Nationality",
+                "Marital Status",
+                "Cost Sharing",
+                "Position",
+                "Grade",
+                "Mobile No",
+                "E-mail"];
+        var columnsFromCOR=[
+                {data: "Company Name", type: 'dropdown', source: ["example1","example2","example3","example4","example5"], validator:notEmpty ,allowInvalid: true},
+                {data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Employee Staff ID", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "First Name", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Second Name", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Family Name", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"], validator:notEmpty ,allowInvalid: true},
+                {data: "DOB", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"], validator:notEmpty ,allowInvalid: true},
+                {data: "Nationality", type: 'dropdown', source: {{{ toJSON(nationalities) }}}, validator:notEmpty ,allowInvalid: true},
+                {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:notEmpty ,allowInvalid: true},
+                {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"], validator:notEmpty ,allowInvalid: true},
+                {data: "Position", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Grade", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Mobile No", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "E-mail", type: "text", validator:notEmpty ,allowInvalid: true}]
+        if(cor=='DUBAI' || cor=='DUBAI LSB'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID",
+                "GDRFAFileNumber",
+                "EMIRATE OF VISA ISSUANCE",
+                "MEMBER TYPE",
+                "ENTITY TYPE",
+                "ESTABLISHMENT ID#",
+                "RESIDENTIAL LOCATION",
+                "WORK LOCATION",
+                "EMPLOYEES SALARY BRACKET",
+                "COMMISSION",
+                "ENTITY CONTACT NUMBER",
+                "ENTITY E-MAIL ID")
+
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text"},
+                {data: "PASSPORT NO.", type: "text"},
+                {data: "UID", type: "text"},
+                {data: "GDRFAFileNumber", type: "text"},
+                {data: "EMIRATE OF VISA ISSUANCE", type: 'dropdown', source:  {{{ toJSON(emirates) }}}},
+                {data: "MEMBER TYPE", type: 'dropdown', source: {{{ toJSON(memberTypes) }}}},
+                {data: "ENTITY TYPE", type: 'dropdown', source: {{{ toJSON(entityTypes) }}}},
+                {data: "ESTABLISHMENT ID#", type: 'dropdown', source: {{{ toJSON(establishmentIds) }}}},
+                {data: "RESIDENTIAL LOCATION", type: 'dropdown', source: {{{ toJSON(residentialLocations) }}}},
+                {data: "WORK LOCATION", type: 'dropdown', source: {{{ toJSON(workLocations) }}}},
+                {data: "EMPLOYEES SALARY BRACKET", type: 'dropdown', source: {{{ toJSON(employeesSalaryBrackets) }}}},
+                {data: "COMMISSION", type: 'dropdown', source: ["example1","example2","example3","example4","example5"]},
+                {data: "ENTITY CONTACT NUMBER", type: "text"},
+                {data: "ENTITY E-MAIL ID", type: "text"})
+
+        }else if(cor=='AUH'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID",
+                "Has the member been previously insured?")
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text"},
+                {data: "PASSPORT NO.", type: "text"},
+                {data: "UID", type: "text"},
+                {data: "Has the member been previously insured?", type: 'dropdown', source: ["Yes","No"]})
+        }else if(cor=='OTHER EMIRATES'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID")
+
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text"},
+                {data: "PASSPORT NO.", type: "text"},
+                {data: "UID", type: "text"})
+        }else if(cor=='JORDAN'){
+            colHeaderFromCOR.push("NATIONAL ID")
+            columnsFromCOR.push(
+                {data: "NATIONAL ID", type: "text", validator:notEmpty ,allowInvalid: true})
+        }else if(cor=='KSA'){
+            colHeaderFromCOR.push(
+                "SAUDI ID",
+                "IQAMA NO.",
+                "IQAMA EXPIRY DATE",
+                "SPONSOR ID")
+            columnsFromCOR.push(
+                {data: "SAUDI ID", type: "text"},
+                {data: "IQAMA NO.", type: "text"},
+                {data: "IQAMA EXPIRY DATE", type: "text"},
+                {data: "SPONSOR ID", type: "text"})
+        }else if(cor=='KUWAIT'){
+            colHeaderFromCOR.push("KUWAIT (KID)")
+            columnsFromCOR.push({data: "KUWAIT (KID)", type: "text"})
+        }else if(cor=='QATAR'){
+            colHeaderFromCOR.push("QATAR (QID)")
+            columnsFromCOR.push({data: "QATAR (QID)", type: "text"})
+        }
+        var container = document.getElementById('example');
+        var lastChange = null;
+        var hot = new Handsontable(container, {
+            data: [[]] ,
+            colHeaders: colHeaderFromCOR,
+            columns: columnsFromCOR,
+            minSpareRows: 1,
+            rowHeaders: false,
+            columnSorting: true,
+            manualRowMove: true,
+            manualColResize: true,
+        });
+            var invalidCount
+        hot.updateSettings({
+            afterChange: function (change, source) {
+            invalidCount=0
+            var tableData = hot.getData();
+            var tableRow = tableData.length-1;
+            for(var rowIndex=0; rowIndex <tableRow; ++rowIndex){
+                var rowData = tableData[rowIndex];
+                var totColumns=rowData.length;
+                for(var columnIndex=0; columnIndex < totColumns;++columnIndex){
+                    var cellProperties = hot.getCellMeta(rowIndex, columnIndex);
+                    if(!cellProperties.valid){
+                        invalidCount++;
+                        var oldClassName=hot.getCell(rowIndex,columnIndex).className
+                        hot.getCell(rowIndex,columnIndex).className=oldClassName+" htInvalid"
+                    }
+                }
+            }
+            if(invalidCount==0){
+                $(".nextStepBtn").removeClass("disabled")//show next btn on change cor in step 1
+            }
+            }
+        })
+        if(globalStepIndex==1){
+            $(".nextStepBtn").click(function(){
+                
+                var tableData = hot.getData();
+                if(invalidCount==0){
+                    if(cor=='DUBAI' || cor=='DUBAI LSB'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    gdrfa_file_number: updatedData[19],
+                                    emirate_of_visa_issuance: updatedData[20],
+                                    member_type: updatedData[21],
+                                    entity_type: updatedData[22],
+                                    establishment_id: updatedData[23],
+                                    residential_location: updatedData[24],
+                                    work_location: updatedData[25],
+                                    employees_salary_bracket: updatedData[26],
+                                    commission: updatedData[27],
+                                    entity_contact_number: updatedData[28],
+                                    entity_email_id: updatedData[29],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='AUH'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    previously_insured: updatedData[19],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='OTHER EMIRATES'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='JORDAN'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    national_id: updatedData[16],
+                                    contact: contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='KSA'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    saudi_id: updatedData[16],
+                                    iqama_id: updatedData[17],
+                                    iqama_expire_at: updatedData[18],
+                                    sponsor_id: updatedData[19],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='KUWAIT'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    kuwait_id : updatedData[16],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='QATAR'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    qatar_id: updatedData[16],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else{
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }
+                    $.ajax({
+                        url: "{{ route('saveMember') }}",
+                        type: "post",
+                        data:  {data:dataArray},
+                        success: function (res) {
+                            $("#smartwizard-arrows-success").smartWizard("next");
+                            $.get("{{ route('addAMemberStep3') }}", function( data ) {
+                                $("#arrows-success-step-3").html( data );
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Something went wrong')
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+            })
+        }
+    }
+            
+</script>
+@endsection

@@ -1,0 +1,41 @@
+@layout('layout.no_auth')
+
+@section('content')
+@if(secret=="sms")
+
+<div class="card">
+    <div class="card-body">
+        <div class="m-sm-4">
+            <h6 class="text-left card-title mb-4">The OTP was just sent, please submit it below</h6>
+            <form action="{{ route('verifyloginOTP') }}" method="post">
+                {{ csrfField() }}
+                <div class="form-group">
+                    <input type="text" class="form-control form-control-lg" name="otp" placeholder="Enter your OTP" />
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-lg btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@else
+<div class="card">
+    <div class="card-body">
+        <div class="m-sm-4 text-center">
+            <img src="{{QRcode}}" />
+            <h6 class="text-left card-title mb-4">Get a verification code from the authy app and submit it below</h6>
+            <form action="{{ route('verifyloginAuthy') }}" method="post">
+                {{ csrfField() }}
+                <div class="form-group">
+                    <input type="number" class="form-control form-control-lg" name="otp" placeholder="Enter your OTP" />
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-lg btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endsection

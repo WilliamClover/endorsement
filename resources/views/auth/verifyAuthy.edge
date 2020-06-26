@@ -1,0 +1,31 @@
+@layout('layout.no_auth')
+
+@section('content')
+
+
+<div class="text-center mt-4">
+  <h1 class="h2">One-time password</h1>
+  <p class="lead">
+    Please get the OTP from the Authy app, and submit it below
+  </p>
+</div>
+<div class="card">
+  <div class="card-body">
+    <div class="m-sm-4 text-center">
+      <img src="{{QRcode}}" />
+      <form action="{{ route('verifyAuthy') }}" method="post">
+        {{ csrfField() }}
+
+        <div class="form-group">
+          <input type="number" class="form-control form-control-lg" name="otp" placeholder="Enter your OTP" />
+          <input type="hidden" class="form-control form-control-lg" name="secret" value="{{secret}}" />
+        </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-lg btn-primary">Sign up</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@endsection

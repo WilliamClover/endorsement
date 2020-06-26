@@ -1,0 +1,141 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:300");
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+.form-control.is-danger {
+  background-size: 100% 100%, 100% 100%;
+  transition-duration: 0.3s;
+  box-shadow: none;
+  background-image: linear-gradient(to top, #f00 2px, rgba(156, 39, 176, 0) 2px),
+    linear-gradient(to top, #d2d2d2 1px, rgba(210, 210, 210, 0) 1px);
+}
+.registeredTabs {
+  border: 3px solid #d5d5d5;
+  width: 50%;
+  margin: 25px auto 60px auto;
+  position: relative;
+}
+.registeredTabs a {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 6px solid #d5d5d5;
+  border-radius: 100%;
+  position: absolute;
+  top: -15px;
+  background: #fff;
+  margin-left: -15px;
+}
+.registeredTabs a:nth-child(3n + 1) {
+  left: 0;
+}
+.registeredTabs a:nth-child(3n + 2) {
+  left: 50%;
+}
+.registeredTabs a:nth-child(3n + 3) {
+  left: 100%;
+}
+.registeredTabs a.current {
+  background: #d80300;
+}
+.registeredTabs a small {
+  display: block;
+  position: absolute;
+  width: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 150%;
+}
+.registeredTabs a.current small {
+  color: #d80300;
+}
+.no-sort:before,
+.no-sort:after {
+  display: none !important;
+}
+.input-group-append,
+.input-group-append .btn {
+  width: 100px;
+}
+.cursorPointer {
+  cursor: pointer;
+}
+.deleteBtn {
+  display: inline-block;
+}
+.accordion .card > .card-header {
+  cursor: pointer;
+  position: relative;
+}
+.accordion .card > .card-header > i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+}
+.accordion .card > .card-header > i.fa-angle-up {
+  display: block;
+}
+.accordion .card > .card-header > i.fa-angle-down {
+  display: none;
+}
+.accordion .card > .card-header.collapsed > i.fa-angle-up {
+  display: none;
+}
+.accordion .card > .card-header.collapsed > i.fa-angle-down {
+  display: block;
+}
+.select2-results__option {
+  text-transform: capitalize;
+}
+.select2-container--bootstrap4
+  .select2-selection--single
+  .select2-selection__rendered {
+  text-transform: capitalize;
+}
+@keyframes slideUp {
+  0% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.2%;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.dropdown-toggle::after {
+  margin-left: 0.5em;
+}
+.dropdown-menu.show {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+.countryCode {
+  background: rgba(0, 0, 0, 0);
+  border: 0;
+  width: 40px;
+  color: #fff;
+  text-align: center;
+}
+.toast-top-center {
+  top: 20px;
+}
+
+.iti--separate-dial-code {
+  width: 100%;
+}

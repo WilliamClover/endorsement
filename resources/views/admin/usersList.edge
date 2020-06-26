@@ -1,0 +1,230 @@
+@layout('layout.app')
+@section('content')
+<div class="row">
+    <div class="col-12 d-flex">
+        <div class="card flex-fill">
+            <div class="card-header">
+                <div class="card-actions float-right">
+                    <div class="dropdown show">
+                        <a href="#" data-toggle="dropdown" data-display="static">
+                            <i class="align-middle" data-feather="more-horizontal"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="card-title mb-0">Registered Users</h5>
+            </div>
+            <div style="padding:15px;">
+                <table id="datatables-dashboard-traffic" class="table table-striped my-0">
+                    <thead>
+                        <tr>
+                            <th>Full Name </th>
+                            <th>Email </th>
+                            <th>Phone Number </th>
+                            <th>Status </th>
+                            <th width="400">Linked User</th>
+                            <th width="70">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(user in users)
+                        <tr>
+                            <td>{{ user.firstname }} {{ user.lastname }}</td>
+                            <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+                            <td>{{ user.phonenumber }}</td>
+                            <td>
+                                @if(user.is_canceled==1)
+                                <span class="badge badge-danger">Deleted</span>
+                                @else
+                                @if(user.accstatus==0)
+                                <span class="badge badge-warning">Inactive</span>
+                                @elseif(user.accstatus==1)
+                                <span class="badge badge-success">Active</span>
+                                @endif
+                                @endif
+                            </td>
+                            <td>
+                                @if(user.is_canceled===0)
+                                @if(user.linked_user_id!==0 && user.linked_user_id!==null)
+                                Linked to
+                                @each(linkedUser in linkedUsers)
+                                @if(linkedUser.contactid===$parent.user.linked_user_id)
+                                {{linkedUser.contact}}
+                                @endif
+
+                                @endeach
+                                <form class="editLinkingUser" style="float:right">
+                                    <!--form done with ajax-->
+                                    {{ csrfField() }}
+                                    <input type="hidden" class="form-control form-control-lg" name="email"
+                                        value="{{user.email}}" />
+                                    <i class="cursorPointer align-middle fas fa-fw fa-edit" data-toggle="tooltip"
+                                        data-placement="top" data-original-title="Update linked user"
+                                        onclick="$(this).parent('form').submit();"></i>
+                                </form>
+                                @else
+                                <form class="linkedUserForm">
+                                    <div class="input-group">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="linkedUserId" id="linkedUserId" value="">
+                                        <input type="hidden" name="registeredUserId" id="registeredUserId"
+                                            value="{{user.id}}">
+                                        <select class="custom-select flex-grow-1 select2" data-toggle="select2">
+                                            @each(linkedUser in linkedUsers)
+
+                                            @if(linkedUser.contactid!==$parent.user.linked_user_id)
+                                            <option value="{{linkedUser.contactid}}">
+                                                {{lowerCase(linkedUser.contact)}}
+                                            </option>
+                                            @endif
+                                            @endeach
+                                        </select>
+                                        <span class="input-group-append">
+                                            <button class="btn btn-secondary" type="submit">Link User</button>
+                                        </span>
+                                    </div>
+                                </form>
+                                @endif
+                                @endif
+                            </td>
+                            <td>
+                                @if(user.is_canceled===0)
+                                <form class="deleteBtn">
+                                    <!--form done with ajax-->
+                                    {{ csrfField() }}
+                                    <input type="hidden" class="form-control form-control-lg" name="email"
+                                        value="{{user.email}}" />
+                                    <i class="cursorPointer align-middle fas fa-fw fa-trash-alt" data-toggle="tooltip"
+                                        data-placement="top" data-original-title="Delete User"
+                                        onclick="$(this).parent('form').submit();"></i>
+                                </form>
+                                @endif
+                            </td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+
+@section('javascript')
+<script>
+    $(function() {
+        // Select2
+        $(".select2").select2({
+            width: 300
+        });
+        $('.select2').on('change', function (e) {
+            $(this).siblings("#linkedUserId").val($(this).val())
+            });
+        $("#datatables-dashboard-traffic").DataTable({
+            columns: [
+                null,
+                null,
+                null,
+                { "searchable": false },
+                { "searchable": false, "orderable": false },
+                { "searchable": false, "orderable": false },
+                { "searchable": false, "orderable": false },
+            ],
+            pageLength: 10,
+            lengthChange: true,
+            bFilter: true,
+            autoWidth: false,
+            aaSorting: []
+        });
+
+    });
+        $('form#activateBtn').submit(function(e) {
+            e.preventDefault();
+            var values = $(this).serialize();
+            $.ajax({
+                url: "{{ route('activateUser') }}",
+                type: "post",
+                data: values ,
+                success: function (res) {
+                    var message = "Message Sent to the activated account";
+                    var title = "";
+                    var type = "success";
+                    showFlashMessages(message,title,type)
+                    console.log($(res).find("#datatables-dashboard-traffic"))
+                    $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                },
+                error: function(xhr, status, error) {
+                    alert('Something went wrong')
+                    console.log(xhr.responseText);
+                }
+            });
+        })
+
+        $('form.deleteBtn').submit(function(e) {
+            var answer = window.confirm("Are you sure you want to delete this User?")
+            e.preventDefault();
+            if(answer!==false){
+                var values = $(this).serialize();
+                $.ajax({
+                    url: "{{ route('deleteUser') }}",
+                    type: "post",
+                    data: values ,
+                    success: function (res) {
+                        $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+            }
+        })
+
+
+        $('form.linkedUserForm').submit(function(e) {
+                e.preventDefault();
+                var values = $(this).serialize();
+                console.log(values)
+                $.ajax({
+                url: "{{ route('linkUser') }}",
+                type: "post",
+                data: values ,
+                success: function (res) {
+                $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                },
+                error: function(xhr, status, error) {
+                    alert('Something went wrong')
+                    console.log(xhr.responseText);
+                }
+            });
+        })
+
+
+        $('form.editLinkingUser').submit(function(e) {
+            var answer = window.confirm("Are you sure you want to changed linked user?")
+            e.preventDefault();
+            if(answer!==false){
+                var values = $(this).serialize();
+                $.ajax({
+                    url: "{{ route('unlinkUser') }}",
+                    type: "post",
+                    data: values ,
+        dataType : "html",
+                    success: function (res) {
+                        $('#datatables-dashboard-traffic').replaceWith($(res).find("#datatables-dashboard-traffic"));
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+                
+            }
+        })
+</script>
+@endsection

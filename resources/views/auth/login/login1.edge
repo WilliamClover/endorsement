@@ -1,0 +1,50 @@
+@layout('layout.no_auth')
+
+@section('content')
+<div class="card mb-0">
+  <div class="card-body">
+    <div class="m-sm-4">
+      <div class="mb-3">
+
+        @if(flashMessage('successMsg'))
+        <div class="alert alert-primary alert-outline alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <div class="alert-message">
+            <h4 class="alert-heading">Well done!</h4>
+            <p class="mb-0">{{flashMessage('successMsg.message')}}</p>
+          </div>
+        </div>
+        @endif
+      </div>
+      <h6 class="card-title mb-4">Login to your Clover account</h6>
+      <form action="{{ route('login') }}" method="post">
+        {{ csrfField() }}
+        <div class="form-group">
+          <label>Email</label>
+          <input type="text" class="form-control form-control-lg" name="email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control form-control-lg" name="password" placeholder="Enter a Password" />
+          <small><a href="/password/reset">Forgot password?</a>
+          </small>
+        </div>
+        <div>
+          <div class="custom-control custom-checkbox align-items-center">
+            <input type="checkbox" class="custom-control-input" name="remember">
+            <label class="custom-control-label text-small">Remember me next time</label>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-lg btn-primary">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="text-center" style="font-size:90%;">New user? <a href="/register">Register here</a></div>
+@endsection
+@section('javascript')
+@endsection

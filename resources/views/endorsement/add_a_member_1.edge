@@ -1,0 +1,687 @@
+@layout('layout.app')
+@section('css')
+<link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+<style>
+    .handsontable tbody th,
+    .handsontable thead th,
+    .handsontable tbody th.ht__active_highlight,
+    .handsontable thead th.ht__active_highlight {
+        background-color: #696969;
+        color: #fff;
+    }
+
+    #text-error {
+        color: #ff4c42
+    }
+
+    #arrows-success-step-2 {
+        overflow-y: hidden;
+    }
+</style>
+@endsection
+@section('content')
+
+<h1 class="h3 mb-3">Addition</h1>
+
+<div class="row mb-3">
+    <div class="col-6">
+        <select class="selectMaster js-states form-control">
+            <option></option>
+            @each(master in masters)
+            <option value="{{master.master}}">{{master.master}}</option>
+            @endeach
+        </select>
+    </div>
+
+    <div class="col-6">
+        <select class="selectCOR js-states form-control">
+            <option></option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3" id="handsOnTableCont" style="display:none;">
+    <div class="col-12">
+        <div class="scrollHotContainer" style="height:auto;overflow-x:hidden;">
+            <div id="example"></div>
+        </div>
+        <button class="btn btn-primary float-right" id="step2Submit">Submit</button>
+    </div>
+</div>
+<div id="text-error"></div>
+@endsection
+@section('javascript')
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+{{ script('assets/js/hot-functions') }}
+<script>
+    $(document).ready(function() {
+        
+        var contact={{{ toJSON(contact) }}},
+        nationalities={{{ toJSON(nationalities) }}},
+        emirates={{{ toJSON(emirates) }}},
+        memberTypes={{{ toJSON(memberTypes) }}},
+        entityTypes={{{ toJSON(entityTypes) }}},
+        establishmentIds={{{ toJSON(establishmentIds) }}},
+        residentialLocations={{{ toJSON(residentialLocations) }}},
+        workLocations={{{ toJSON(workLocations) }}},
+        employeesSalaryBrackets={{{ toJSON(employeesSalaryBrackets) }}},
+        residentialLocations={{{ toJSON(residentialLocations) }}}
+        $(".selectMaster").val('').change();
+        $(".selectMaster").select2({
+            placeholder: "Select Master"
+        });
+        $('.selectMaster').on('change', function (e) {
+            master =$(this).val();
+            $(".selectCOR option").remove()
+            $.ajax({
+                    url: "{{ route('getCORFromMaster') }}",
+                    type: "get",
+                    data: {master:$(this).val()},
+                    success: function (res) {
+                        $(".selectCOR").append("<option></option>")
+                        $.each(res, function( index, value ) {
+                            $(".selectCOR").append("<option value='"+value.country +"'>"+value.country +"</option>")
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+        });
+
+        $(".selectCOR").select2({
+            placeholder: "Select Country of Residence"
+        });               
+        $('.selectCOR').on('change', function (e) {
+            $("#handsOnTableCont").css("display","block")
+            cor =$(this).val();
+            handsOnTable(master,cor,contact,nationalities,emirates,memberTypes,entityTypes,establishmentIds,residentialLocations,workLocations,employeesSalaryBrackets,residentialLocations)
+        })
+    })
+
+
+    //HOT Validations Function --END--
+    function handsOnTable(master,cor,contact,nationalities,emirates,memberTypes,entityTypes,establishmentIds,residentialLocations,workLocations,employeesSalaryBrackets,residentialLocations) {
+        var relationValue=null
+        var nationalityValue=null
+        var errorMsg=[]
+        //Validations done: dropdown, notEmpty, email, minimum length 2, if filled min length
+        var min2ifNotEmpty = function (value, callback) {
+            var min2=minLengthfunction(value,2)
+            var lettersAndSpaces=lettersAndSpacesfunction(value)
+            if (String(value).length != 0) {
+                if(min2.validation==true && lettersAndSpaces.validation==true){
+                    callback(true)
+                    $("#text-error").text("")
+                }else{
+                    callback(false)
+                    $("#text-error").text("The selected data field "+min2.message+lettersAndSpaces.message)
+                }
+            }else{
+                callback(true);
+                $("#text-error").text("")
+            }
+        };
+        var notEmpty = function (value, callback) {
+            var notEmpty=notEmptyfunction(value)
+            if(notEmpty.validation==true){
+                //callback(true)
+                $("#text-error").html("")
+            }else{
+                callback(false)
+                $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+            }
+        };
+        var validEmailIfPrinciple = function (value, callback) {
+            var notEmpty=notEmptyfunction(value)
+            var validEmail=validEmailfunction(value)
+            if(relationValue=="1= PRINCIPAL"){
+                if(notEmpty.validation==true && validEmail.validation==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
+                }
+            }else{
+                if(validEmail.validation==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+validEmail.message+"</p>")
+                }
+            }
+        }
+        var namesValidation = function(value,callback){
+            var notEmpty=notEmptyfunction(value)
+            var min2=minLengthfunction(value,2)
+            var lettersAndSpaces=lettersAndSpacesfunction(value)
+            if(notEmpty.validation==true && min2.validation==true && lettersAndSpaces.validation==true){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                callback(false)
+                $("#text-error").html("<p>The selected data field "+notEmpty.message+min2.message+lettersAndSpaces.message+"</p>")
+            }
+        }
+        var alphaNumericIfNotEmptyValidation = function(value,callback){
+            var alphaNumeric=alphaNumericfunction(value)
+            if (String(value).length != 0) {
+                if(alphaNumeric.validation==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+alphaNumeric.message+"</p>")
+                }
+            }else{
+                callback(true);
+                $("#text-error").html("")
+            }
+        }
+        var phoneNumberIfPrinciple = function (value, callback) {
+            var checkPhoneNumber=checkPhoneNumberfunction(value)
+            var notEmpty=notEmptyfunction(value)
+            if(relationValue=="1= PRINCIPAL"){
+                if(notEmpty.validation==true){
+                    if(checkPhoneNumber.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                }
+            }else{
+                    if(checkPhoneNumber.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
+                    }
+            }
+        }
+        var employeeStaffId= function (value,callback){
+            var min2=minLengthfunction(value,2)
+            var notEmpty=notEmptyfunction(value)
+            if(notEmpty.validation==true){
+                if(min2.validation==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+min2.message+"</p>")
+                }
+            }else{
+                if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                }else{
+                    callback(true)
+                    $("#text-error").html("")
+                }
+            }
+        }
+        var positionField= function (value,callback){
+            var min3=minLengthfunction(value, 3)
+            var notEmpty=notEmptyfunction(value)
+            if(notEmpty.validation==true){
+                if(min3.validation==true){
+                    callback(true)
+                    $("#text-error").text("")
+                }else{
+                    callback(false)
+                    $("#text-error").text("The selected data field " + min3.message)
+                }
+            }else{
+                if(relationValue=="1= PRINCIPAL" && nationalityValue=="Kingdom Of Saudi Arabia"){
+                    callback(false)
+                    $("#text-error").text("The selected data field " + notEmpty.message)
+                }else{
+                    callback(true)
+                    $("#text-error").text("")
+                }
+            }
+        }
+        var acceptableDate=function(value,callback){
+            const timestampFromValue=Date.parse(value);
+            const currentTimestamp=Date.now()
+            const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
+            
+            var validateDate=validateDatefunction(timestampFromValue)
+            if(validateDate.validation==true){
+                if(ageFromtimestamps>99 || ageFromtimestamps<0){
+                    callback(false)
+                    $("#text-error").html("Age should be from 0 to 99")
+                }else{
+                    if(relationValue=="3= CHILD" && ageFromtimestamps>25){
+                        callback(false)
+                        $("#text-error").html("Only children under 25 are dependant")
+                    }else{
+                        callback(true)
+                        $("#text-error").html("")
+                    }
+                }
+            }else{
+                callback(false)
+                $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
+            }
+        }
+        var emiratesIdNumber=function(value,callback){
+            var validIdNum=validIdNumFunction(value,18,3)
+            
+            if(validIdNum.validation==true){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                callback(false)
+                $("#text-error").html("The selected data field "+validIdNum.message)
+            }
+        }
+        cor = cor.toUpperCase()
+        var dataArray=[];
+            var invalidCount
+        var colHeaderFromCOR=[
+                "Company Name",
+                "Shop or Site or Department",
+                "Employee Staff ID",
+                "First Name",
+                "Second Name",
+                "Family Name",
+                "Relation",
+                "DOB",
+                "Gender",
+                "Nationality",
+                "Marital Status",
+                "Cost Sharing",
+                "Position",
+                "Grade",
+                "Mobile No",
+                "E-mail"];
+        var columnsFromCOR=[
+                {data: "Company Name", type: 'autocomplete', source: ["example1","example2","example3","example4","example5"] ,allowInvalid: true},
+                {data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "Employee Staff ID", type: "text", validator:employeeStaffId ,allowInvalid: true},
+                {data: "First Name", type: "text", validator:namesValidation ,allowInvalid: true},
+                {data: "Second Name", type: "text", validator:min2ifNotEmpty ,allowInvalid: true},
+                {data: "Family Name", type: "text", validator:namesValidation ,allowInvalid: true},
+                {data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"]},
+                {data: "DOB", type: "date",dateFormat:'MM/DD/YYYY', correctFormat: true, validator:acceptableDate ,allowInvalid: true},
+                {data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"] ,allowInvalid: true},
+                {data: "Nationality", type: 'dropdown', source: nationalities ,allowInvalid: true},
+                {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"] ,allowInvalid: true},
+                {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true},
+                {data: "Position", type: "text", validator:positionField ,allowInvalid: true},
+                {data: "Grade", type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true},
+                {data: "Mobile No", type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true},
+                {data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true}]
+        if(cor=='JORDAN' || cor=='DUBAI' || cor=='DUBAI LSB'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID",
+                "GDRFAFileNumber",
+                "EMIRATE OF VISA ISSUANCE",
+                "MEMBER TYPE",
+                "ENTITY TYPE",
+                "ESTABLISHMENT ID#",
+                "RESIDENTIAL LOCATION",
+                "WORK LOCATION",
+                "EMPLOYEES SALARY BRACKET",
+                "COMMISSION",
+                "ENTITY CONTACT NUMBER",
+                "ENTITY E-MAIL ID")
+
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text", validator:emiratesIdNumber ,allowInvalid: true},
+                {data: "PASSPORT NO.", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "UID", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "GDRFAFileNumber", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "EMIRATE OF VISA ISSUANCE", type: 'dropdown', source:  emirates, validator:notEmpty ,allowInvalid: true},
+                {data: "MEMBER TYPE", type: 'dropdown', source: memberTypes, validator:notEmpty ,allowInvalid: true},
+                {data: "ENTITY TYPE", type: 'dropdown', source: entityTypes, validator:notEmpty ,allowInvalid: true},
+                {data: "ESTABLISHMENT ID#", type: 'dropdown', source: establishmentIds, validator:notEmpty ,allowInvalid: true},
+                {data: "RESIDENTIAL LOCATION", type: 'dropdown', source: residentialLocations, validator:notEmpty ,allowInvalid: true},
+                {data: "WORK LOCATION", type: 'dropdown', source: workLocations, validator:notEmpty ,allowInvalid: true},
+                {data: "EMPLOYEES SALARY BRACKET", type: 'dropdown', source: employeesSalaryBrackets, validator:notEmpty ,allowInvalid: true},
+                {data: "COMMISSION", type: 'dropdown', source: ["example1","example2","example3","example4","example5"], validator:notEmpty ,allowInvalid: true},
+                {data: "ENTITY CONTACT NUMBER", type: "text", validator:notEmpty ,allowInvalid: true},
+                {data: "ENTITY E-MAIL ID", type: "text", validator:notEmpty ,allowInvalid: true})
+
+        }else if(cor=='AUH'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID",
+                "Has the member been previously insured?")
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text"},
+                {data: "PASSPORT NO.", type: "text"},
+                {data: "UID", type: "text"},
+                {data: "Has the member been previously insured?", type: 'dropdown', source: ["Yes","No"]})
+        }else if(cor=='OTHER EMIRATES'){
+            colHeaderFromCOR.push(
+                "EMIRATES ID NO.",
+                "PASSPORT NO.",
+                "UID")
+            columnsFromCOR.push(
+                {data: "EMIRATES ID NO.", type: "text"},
+                {data: "PASSPORT NO.", type: "text"},
+                {data: "UID", type: "text"})
+        }else if(cor=='JORDAN1'){
+            colHeaderFromCOR.push("NATIONAL ID")
+            columnsFromCOR.push(
+                {data: "NATIONAL ID", type: "text", validator:notEmpty ,allowInvalid: true})
+        }else if(cor=='KSA'){
+            colHeaderFromCOR.push(
+                "SAUDI ID",
+                "IQAMA NO.",
+                "IQAMA EXPIRY DATE",
+                "SPONSOR ID")
+            columnsFromCOR.push(
+                {data: "SAUDI ID", type: "text"},
+                {data: "IQAMA NO.", type: "text"},
+                {data: "IQAMA EXPIRY DATE", type: "text"},
+                {data: "SPONSOR ID", type: "text"})
+        }else if(cor=='KUWAIT'){
+            colHeaderFromCOR.push("KUWAIT (KID)")
+            columnsFromCOR.push({data: "KUWAIT (KID)", type: "text"})
+        }else if(cor=='QATAR'){
+            colHeaderFromCOR.push("QATAR (QID)")
+            columnsFromCOR.push({data: "QATAR (QID)", type: "text"})
+        }
+        var container = document.getElementById('example');
+        var lastChange = null;
+        var hot = new Handsontable(container, {
+            data: [[]] ,
+            colHeaders: colHeaderFromCOR,
+            columns: columnsFromCOR,
+            minSpareRows: 1,
+            rowHeaders: false,
+            columnSorting: true,
+            manualRowMove: true,
+            width: "100%",
+            height: 200,
+            colWidths: 200,
+            manualColumnResize: true,
+        });
+        hot.updateSettings({
+            afterChange: function (change, source) {
+            invalidCount=0
+            var tableData = hot.getData();
+            var tableRow = tableData.length-1;
+            relationValue=hot.getDataAtCell(change[0][0],6)
+            nationalityValue=hot.getDataAtCell(change[0][0],9)
+            for(var rowIndex=0; rowIndex <tableRow; ++rowIndex){
+                var rowData = tableData[rowIndex];
+                var totColumns=rowData.length;
+                for(var columnIndex=0; columnIndex < totColumns;++columnIndex){
+                    var cellProperties = hot.getCellMeta(rowIndex, columnIndex);
+                    if(!cellProperties.valid){
+                        invalidCount++;
+                        //var oldClassName=hot.getCell(rowIndex,columnIndex).className
+                        //hot.getCell(rowIndex,columnIndex).className=oldClassName+" htInvalid"
+                    }
+                }
+            }
+            }
+        })
+
+        Handsontable.dom.addEvent(document.getElementById('step2Submit'), 'click', function() {
+                var tableData = hot.getData();
+                if(invalidCount==0){
+                    if(cor=='DUBAI' || cor=='DUBAI LSB'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    gdrfa_file_number: updatedData[19],
+                                    emirate_of_visa_issuance: updatedData[20],
+                                    member_type: updatedData[21],
+                                    entity_type: updatedData[22],
+                                    establishment_id: updatedData[23],
+                                    residential_location: updatedData[24],
+                                    work_location: updatedData[25],
+                                    employees_salary_bracket: updatedData[26],
+                                    commission: updatedData[27],
+                                    entity_contact_number: updatedData[28],
+                                    entity_email_id: updatedData[29],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='AUH'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    previously_insured: updatedData[19],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='OTHER EMIRATES'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='JORDAN'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    national_id: updatedData[16],
+                                    contact: contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='KSA'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    saudi_id: updatedData[16],
+                                    iqama_id: updatedData[17],
+                                    iqama_expire_at: updatedData[18],
+                                    sponsor_id: updatedData[19],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='KUWAIT'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    kuwait_id : updatedData[16],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else if(cor=='QATAR'){
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    qatar_id: updatedData[16],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }else{
+                        tableData.forEach(function(updatedData){
+                            if(updatedData[0]!=null){
+                                dataArray.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: "2020-01-19 03:14:07",
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    contact:contact,
+                                    master: master
+                                })
+                            }
+                        })
+                    }
+                    $.ajax({
+                        url: "{{ route('saveMember') }}",
+                        type: "post",
+                        data:  {data:dataArray},
+                        success: function (res) {
+                            $("#smartwizard-arrows-success").smartWizard("next");
+                            $.get("{{ route('addAMemberStep3') }}", function( data ) {
+                                $("#arrows-success-step-3").html( data );
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Something went wrong')
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+            })
+    }
+</script>
+@endsection

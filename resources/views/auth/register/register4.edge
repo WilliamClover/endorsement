@@ -1,0 +1,53 @@
+@layout('layout.no_auth')
+@section('css')
+{{ style('assets/css/intlTelInput') }}
+@endsection
+@section('content')
+<div class="card">
+  <div class="card-body">
+    <div class="my-4">
+      <h6 class="card-title my-5 text-center">You have successfully created your account!<br />A verification email was
+        sent to: {{email}}.<br />Open this email and click the link to activate your account.<br /><br /><a
+          href="/login">Click
+          here
+          to go to the
+          login page</h6>
+    </div>
+  </div>
+</div>
+
+
+@endsection
+
+
+@section('javascript')
+{{ script('assets/js/intlTelInput') }}
+<script>
+  var input = document.querySelector("#phone");
+  window.intlTelInput(input, {
+    // allowDropdown: false,
+    // autoHideDialCode: false,
+    // autoPlaceholder: "off",
+    // dropdownContainer: document.body,
+    // excludeCountries: ["us"],
+    // formatOnDisplay: false,
+    initialCountry: "auto",
+    geoIpLookup: function(success, failure) {
+      //You can remove the token
+      $.get("https://ipinfo.io?token=ea0a74dcb6016f", function() {}, "jsonp").always(function(resp) {
+        var countryCode = (resp && resp.country) ? resp.country : "";
+        success(countryCode);
+      });
+    },
+    hiddenInput: "phonenumber",
+    //localizedCountries: { 'de': 'Deutschland' },
+    // nationalMode: false,
+    // onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
+    // placeholderNumberType: "MOBILE",
+     preferredCountries: ['lb', 'jo', 'ae', 'qa', 'om', 'eg', 'bh', 'kw'],
+     separateDialCode: true,
+    utilsScript: "assets/js/utils.js",
+  });
+  
+</script>
+@endsection

@@ -1,0 +1,67 @@
+<table id="datatables-reponsive" class="table table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Name</th>
+            <th>Relation</th>
+            <th>Gender</th>
+            <th>Nationality</th>
+            <th>Marital Status</th>
+            @each(policy in policies)
+            <th>{{policy}}</th>
+            @endeach
+        </tr>
+    </thead>
+    <tbody>
+        @each(data in step2Data)
+        <tr>
+            <td>{{data.company_name}}</td>
+            <td>{{data.first_name}} {{data.last_name}}</td>
+            <td>{{data.relation}}</td>
+            <td>{{data.gender}}</td>
+            <td>{{data.nationality}}</td>
+            <td>{{data.marital_status}}</td>
+            @each(policy in policies)
+            <td>
+                <form class="categoryForm">
+                    {{ csrfField() }}
+                    <input type="hidden" name="addHealthTempId" value="102" />
+                    <input type="hidden" name="policyid" value="{{policy}}" />
+                    <select class="js-states form-control select2" onchange="$(this).parent('form').submit();"
+                        name="category" data-toggle="select2">
+                        <option></option>
+                        <option>Category 1</option>
+                        <option>Category 2</option>
+                        <option>Category 3</option>
+                    </select>
+                </form>
+            </td>
+            @endeach
+        </tr>
+        @endeach
+
+    </tbody>
+</table>
+<script>
+    $(document).ready(function() {
+        $(".select2").select2({
+            placeholder: "Select Category"
+        });  
+        });  
+        $('form.categoryForm').submit(function(e) {
+                e.preventDefault();
+                var values = $(this).serialize();
+                console.log(values)
+                $.ajax({
+                url: "{{ route('addCategory') }}",
+                type: "post",
+                data: values ,
+                success: function (res) {
+                },
+                error: function(xhr, status, error) {
+                    alert('Something went wrong')
+                    console.log(xhr.responseText);
+                }
+            });
+        })
+</script>

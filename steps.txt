@@ -1,0 +1,34 @@
+npm install mysql --save
+
+adonis install @adonisjs/mail
+
+https://mailtrap.io SIGNIN WITH GITHUB
+
+adonis migration:run
+
+
+adonis install @adonisjs/validator
+
+const { hooks } = require("@adonisjs/ignitor");
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------
+password encrypted
+Strong password
+2 factor authentication that will change every 30 seconds
+
+npm install speakeasy qrcode
+
+
+Search for hooks in adonisjs
+search for @adonis/... providers

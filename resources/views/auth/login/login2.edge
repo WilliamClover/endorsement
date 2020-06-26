@@ -1,0 +1,30 @@
+@layout('layout.no_auth')
+
+@section('content')
+<div class="card mb-0">
+  <div class="card-body">
+    <h6 class="card-title my-4">Choose a second layer of security. (We will remember your selection next time)</h6>
+    <div class="my-4">
+      <form action="{{ route('login2') }}" method="post">
+        {{ csrfField() }}
+        <div class="form-group pt-3">
+          <label class="custom-control custom-radio form-check-inline">
+            <input name="fa2" type="radio" class="custom-control-input" value="sms" checked>
+            <span class="custom-control-label">Verify One-Time Password by SMS</span>
+          </label>
+          <label class="custom-control custom-radio form-check-inline">
+            <input name="fa2" type="radio" class="custom-control-input" value="authy">
+            <span class="custom-control-label">Use Authy App</span>
+          </label>
+        </div>
+        <div class="text-center mt-3">
+          <a href="/login" class=" btn btn-lg btn-secondary">back</a>
+          <button type="submit" class="btn btn-lg btn-primary">Next</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endsection
+@section('javascript')
+@endsection

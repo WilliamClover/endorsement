@@ -1,0 +1,29 @@
+@layout('layout.no_auth')
+
+@section('content')
+
+
+
+<div class="card">
+    <div class="card-body">
+        <h6 class="card-title mt-4 mb-5">Verify your mobile number</h6>
+        <div class="registeredTabs">
+            <a><small>User&nbsp;Details</small></a>
+            <a class="current"><small>OTP</small></a>
+            <a><small>Account&nbsp;Details</small></a>
+        </div>
+        <div class="my-4">
+            <form action="{{ route('register2') }}" method="post">
+                {{ csrfField() }}
+
+                <div class="form-group">
+                    <input type="number" class="form-control form-control-lg" name="otp" placeholder="Enter your OTP" />
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-lg btn-primary">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

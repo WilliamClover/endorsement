@@ -1,0 +1,365 @@
+@layout('layout.app')
+@section('content')
+<h1 class="h3 mb-3">My Pending Requests</h1>
+<div class="row">
+    <div class="col-12">
+        <div class="accordion" id="myPendingRequests">
+            <div class="card mb-4">
+                <div class="card-header collapsed" data-toggle="collapse" data-target="#myPendingRequests1"
+                    aria-expanded="true" aria-controls="myPendingRequests1">
+                    <h5 class="card-title mb-0">Endorsement ID &nbsp; &nbsp; <span class="badge badge-warning">Waiting
+                            Approval</span>
+                        date of endorsement - policy
+                    </h5>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+                </div>
+                <div id="myPendingRequests1" class="collapse" aria-labelledby="headingOne"
+                    data-parent="#myPendingRequests">
+                    <table id="datatables-clients" class="table table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date of ticket</th>
+                                <th>Name</th>
+                                <th>Company name</th>
+                                <th>Employee ID</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2345445664</td>
+                                <th>13/4/2020</th>
+                                <td>Ashton Cox</td>
+                                <td>Levitz Furniture</td>
+                                <td>23454-45664</td>
+                                <th> - </th>
+                            </tr>
+                            <tr>
+                                <td>2345445664</td>
+                                <th>13/4/2020</th>
+                                <td>Sonya Frost</td>
+                                <td>Child World</td>
+                                <td>23454-45664</td>
+                                <th> - </th>
+                            </tr>
+                            <tr>
+                                <td>2345445664</td>
+                                <th>13/4/2020</th>
+                                <td>Jena Gaines</td>
+                                <td>Helping Hand</td>
+                                <td>23454-45664</td>
+                                <th> - </th>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1 class="h3 mb-3">My Completed Requests</h1>
+<div class="row">
+
+    <div class="col-12">
+
+        <div class="accordion" id="myCompletedRequests">
+            <div class="card mb-1">
+                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests1"
+                    aria-expanded="true" aria-controls="myCompletedRequests1">
+                    <h5 class="card-title mb-0">Azadea Dubai</h5>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                </div>
+                <div id="myCompletedRequests1" class="collapse" aria-labelledby="headingOne"
+                    data-parent="#myCompletedRequests">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Clover payment</th>
+                                <th scope="col">Policy ID</th>
+                                <th scope="col">LOB</th>
+                                <th scope="col">Supplier</th>
+                                <th scope="col">Currency</th>
+                                <th scope="col">COR</th>
+                                <th scope="col">Policyholder</th>
+                                <th scope="col">Eff date</th>
+                                <th scope="col">Exp Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">P1</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P2</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P3</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card mb-1">
+                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests2"
+                    aria-expanded="true" aria-controls="myCompletedRequests2">
+                    <h5 class="card-title mb-0">Azadea Lebanon</h5>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                </div>
+                <div id="myCompletedRequests2" class="collapse" aria-labelledby="headingOne"
+                    data-parent="#myCompletedRequests">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Clover payment</th>
+                                <th scope="col">Policy ID</th>
+                                <th scope="col">LOB</th>
+                                <th scope="col">Supplier</th>
+                                <th scope="col">Currency</th>
+                                <th scope="col">COR</th>
+                                <th scope="col">Policyholder</th>
+                                <th scope="col">Eff date</th>
+                                <th scope="col">Exp Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">P1</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P2</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P3</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests3"
+                    aria-expanded="true" aria-controls="myCompletedRequests3">
+                    <h5 class="card-title mb-0">Azadea Jordan</h5>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                </div>
+                <div id="myCompletedRequests3" class="collapse" aria-labelledby="headingOne"
+                    data-parent="#myCompletedRequests">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Clover payment</th>
+                                <th scope="col">Policy ID</th>
+                                <th scope="col">LOB</th>
+                                <th scope="col">Supplier</th>
+                                <th scope="col">Currency</th>
+                                <th scope="col">COR</th>
+                                <th scope="col">Policyholder</th>
+                                <th scope="col">Eff date</th>
+                                <th scope="col">Exp Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">P1</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P2</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P3</th>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                                <td>Cell</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<h1 class="h3 mb-3">My Rejected Members</h1>
+<div class="row">
+    <div class="col-12">
+        <div class="accordion" id="myRejectedRequests">
+            <div class="card mb-4">
+                <div class="card-header collapsed" data-toggle="collapse" data-target="#myRejectedRequests1"
+                    aria-expanded="true" aria-controls="myRejectedRequests1">
+                    <h5 class="card-title mb-0">Azadea Dubai</h5>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                </div>
+                <div id="myRejectedRequests1" class="collapse" aria-labelledby="headingOne"
+                    data-parent="#myRejectedRequests">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Full Name</th>
+                                <th scope="col">Policy ID</th>
+                                <th scope="col">LOB</th>
+                                <th scope="col">Reason of rejection</th>
+                                <th scope="col">Rejection date</th>
+                                <th scope="col" width="150"></th>
+                                <th scope="col" width="200"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">P1</th>
+                                <td>William elTurk</td>
+                                <td>43434345 45545</td>
+                                <td>Health</td>
+                                <td>Cell</td>
+                                <td>12/4/2020</td>
+                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
+                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P2</th>
+                                <td>William elTurk</td>
+                                <td>43434345 45545</td>
+                                <td>Health</td>
+                                <td>Cell</td>
+                                <td>12/4/2020</td>
+                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
+                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P3</th>
+                                <td>William elTurk</td>
+                                <td>43434345 45545</td>
+                                <td>Health</td>
+                                <td>Cell</td>
+                                <td>12/4/2020</td>
+                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
+                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P4</th>
+                                <td>William elTurk</td>
+                                <td>43434345 45545</td>
+                                <td>Health</td>
+                                <td>Cell</td>
+                                <td>12/4/2020</td>
+                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
+                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P5</th>
+                                <td>William elTurk</td>
+                                <td>43434345 45545</td>
+                                <td>Health</td>
+                                <td>Cell</td>
+                                <td>12/4/2020</td>
+                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
+                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+
+@section('javascript')
+@endsection

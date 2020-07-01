@@ -2,6 +2,7 @@
 const User = use("App/Models/User");
 const Database = use("Database");
 const Env = use("Env");
+const Helpers = use("Helpers");
 
 class EndorsementController {
   async myPolicies({ view, auth }) {
@@ -28,6 +29,21 @@ class EndorsementController {
     const masters = await Database.table("policies")
       .where("contactid", auth.user.linked_user_id)
       .distinct("master");
+
+    return view.render("endorsement/add_a_member_1", {
+      masters: masters,
+    });
+  }
+  async addAMember2({ view, auth, request, response }) {
+    const master = request.body.master;
+    const cor = request.body.cor;
+
+    const policiesDB = await Database.table("policies")
+      .where("contactid", auth.user.linked_user_id)
+      .where("country", cor)
+      .distinct("policyid");
+    let policies = policiesDB.map((a) => a.policyid);
+
     const emiratesDB = await Database.from("emirates").distinct("name");
     let emirates = emiratesDB.map((a) => a.name);
     const nationalitiesDB = await Database.from("countries").distinct(
@@ -60,9 +76,7 @@ class EndorsementController {
     ).distinct("name");
     let employeesSalaryBrackets = employeesSalaryBracketsDB.map((a) => a.name);
 
-    return view.render("endorsement/add_a_member_1", {
-      contact: contact.contact,
-      masters: masters,
+    return view.render("endorsement/add_a_member_2", {
       emirates: emirates,
       nationalities: nationalities,
       memberTypes: memberTypes,
@@ -71,17 +85,21 @@ class EndorsementController {
       residentialLocations: residentialLocations,
       workLocations: workLocations,
       employeesSalaryBrackets: employeesSalaryBrackets,
+      policies: policies,
+      master: master,
+      cor: cor,
     });
   }
   async addAMemberStep3({ view, session, auth }) {
     const step2Data = session.get("step2Data");
     const policiesDB = await Database.table("policies")
       .where("contactid", auth.user.linked_user_id)
+      .where("country", step2Data.cor)
       .distinct("policyid");
     let policies = policiesDB.map((a) => a.policyid);
 
     return view.render("endorsement/add_a_member_step3", {
-      step2Data: step2Data,
+      step2Data: step2Data.data,
       policies: policies,
     });
   }
@@ -111,11 +129,33 @@ class EndorsementController {
     const insertedData = request.input("data");
     session.put("step2Data", insertedData);
     const firstUserId = await Database.from("add_health_temps").insert(
-      insertedData
+      insertedData.data
     );
     return "Data Added Successfully";
   }
 
+  async step4Upload({ request, response, session }) {
+    const profilePics = request.file("profile_pics", {
+      types: ["image"],
+      size: "2mb",
+    });
+    await profilePics.moveAll(
+      Helpers.tmpPath("uploads/endorsementDocs"),
+      (file) => {
+        console.log("fff", file);
+        return {
+          name: `${new Date().getTime()}.${file.subtype}`,
+        };
+      }
+    );
+
+    if (!profilePics.movedAll()) {
+      return profilePics.errors();
+    }
+  }
+  async deletion({ view }) {
+    return view.render("endorsement/deletion");
+  }
   async deletion({ view }) {
     return view.render("endorsement/deletion");
   }

@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Nunito:400, 600);
+@import url(https://fonts.googleapis.com/css?family=Nunito:400,600);
 /*!
  * Bootstrap v4.4.1 (https://getbootstrap.com/)
  * Copyright 2011-2019 The Bootstrap Authors
@@ -25076,10 +25076,10 @@ div.dataTables_wrapper span.select-item {
   background: #a20000;
 }
 .wizard.sw-theme-default > ul.step-anchor > li.done > a {
-  color: #80cfd4 !important;
+  color: #c86969 !important;
 }
 .wizard.sw-theme-default > ul.step-anchor > li.done > a:after {
-  background: #80cfd4 !important;
+  background: #c86969 !important;
 }
 .wizard.sw-theme-arrows > ul.step-anchor > li.active > a {
   border-color: #a20000 !important;
@@ -25089,11 +25089,11 @@ div.dataTables_wrapper span.select-item {
   border-left-color: #a20000 !important;
 }
 .wizard.sw-theme-arrows > ul.step-anchor > li.done > a {
-  border-color: #80cfd4 !important;
-  background: #80cfd4 !important;
+  border-color: #c86969 !important;
+  background: #c86969 !important;
 }
 .wizard.sw-theme-arrows > ul.step-anchor > li.done > a:after {
-  border-left-color: #80cfd4 !important;
+  border-left-color: #c86969 !important;
 }
 .wizard.sw-theme-arrows .sw-toolbar-bottom,
 .wizard.sw-theme-default .sw-toolbar-bottom {
@@ -25111,10 +25111,10 @@ div.dataTables_wrapper span.select-item {
   background: #a20000;
 }
 .wizard-primary.sw-theme-default > ul.step-anchor > li.done > a {
-  color: #80cfd4 !important;
+  color: #c86969 !important;
 }
 .wizard-primary.sw-theme-default > ul.step-anchor > li.done > a:after {
-  background: #80cfd4 !important;
+  background: #c86969 !important;
 }
 .wizard-primary.sw-theme-arrows > ul.step-anchor > li.active > a {
   border-color: #a20000 !important;
@@ -25124,11 +25124,11 @@ div.dataTables_wrapper span.select-item {
   border-left-color: #a20000 !important;
 }
 .wizard-primary.sw-theme-arrows > ul.step-anchor > li.done > a {
-  border-color: #80cfd4 !important;
-  background: #80cfd4 !important;
+  border-color: #c86969 !important;
+  background: #c86969 !important;
 }
 .wizard-primary.sw-theme-arrows > ul.step-anchor > li.done > a:after {
-  border-left-color: #80cfd4 !important;
+  border-left-color: #c86969 !important;
 }
 .wizard-secondary.sw-theme-default > ul.step-anchor > li.active > a {
   color: #a180da !important;

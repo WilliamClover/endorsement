@@ -104,6 +104,9 @@ Route.get(
 
 Route.get("endorsement/myRequests", "EndorsementController.myRequests");
 Route.get("endorsement/addAMember", "EndorsementController.addAMember");
+Route.post("endorsement/addAMember2", "EndorsementController.addAMember2").as(
+  "addAMember2"
+);
 Route.get(
   "endorsement/addAMemberStep3",
   "EndorsementController.addAMemberStep3"
@@ -118,6 +121,9 @@ Route.post("endorsement/saveMember", "EndorsementController.saveMember").as(
 );
 Route.post("endorsement/addCategory", "EndorsementController.addCategory").as(
   "addCategory"
+);
+Route.post("endorsement/step4Upload", "EndorsementController.step4Upload").as(
+  "step4Upload"
 );
 
 // APIs start

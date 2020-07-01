@@ -105,6 +105,10 @@ body {
   .select2-selection__rendered {
   text-transform: capitalize;
 }
+.htCore > tbody > tr > td.htDisabled:before {
+  content: "Disabled";
+  font-style: italic;
+}
 @keyframes slideUp {
   0% {
     transform: translateY(40px);

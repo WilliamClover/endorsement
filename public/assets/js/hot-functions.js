@@ -113,10 +113,15 @@ function validateDatefunction(value) {
   }
 }
 function validIdNumFunction(value, length, distinctLength) {
-  arr = $.unique(value.split(""));
-  distinctDigLength = arr.length;
+  var arr = $.unique(value.split(""));
+  var distinctDigLength = arr.length;
+  var first3Num = value.substring(0, 3).match(/^[0-9]+$/);
 
-  if (value.length == length && distinctDigLength >= distinctLength) {
+  if (
+    value.length == length &&
+    distinctDigLength >= distinctLength &&
+    first3Num != null
+  ) {
     return {
       validation: true,
       message: "",
@@ -125,6 +130,76 @@ function validIdNumFunction(value, length, distinctLength) {
     return {
       validation: false,
       message: "must be valid, ",
+    };
+  }
+}
+function distinctNumberFunction(value) {
+  var arr = $.unique(value.split(""));
+  var distinctDigLength = arr.length;
+
+  if (distinctDigLength >= 3) {
+    return {
+      validation: true,
+      message: "",
+    };
+  } else {
+    return {
+      validation: false,
+      message: "must be valid, ",
+    };
+  }
+}
+function uidNumberFunction(value, lengthMin, lengthMax) {
+  var arr = $.unique(value.split(""));
+  var distinctDigLength = arr.length;
+  var allNum = value.match(/^[0-9]+$/);
+
+  if (
+    value.length >= lengthMin &&
+    value.length <= lengthMax &&
+    distinctDigLength >= 3 &&
+    allNum != null
+  ) {
+    return {
+      validation: true,
+      message: "",
+    };
+  } else {
+    return {
+      validation: false,
+      message: "must be valid, ",
+    };
+  }
+}
+function UAEnumFormatfunction(value) {
+  const validPhoneFormat = $.ajax({
+    type: "GET",
+    url: "http://apilayer.net/api/validate",
+    dataType: "json",
+    data: { access_key: "386661ddd43191ec181a736418ab4702", number: value },
+    async: false,
+    done: function (results) {
+      JSON.parse(results);
+      return results;
+    },
+    fail: function (jqXHR, textStatus, errorThrown) {
+      console.log(
+        "Could not get posts, server response: " +
+          textStatus +
+          ": " +
+          errorThrown
+      );
+    },
+  }).responseJSON;
+  if (validPhoneFormat.valid == true && validPhoneFormat.country_code == "AE") {
+    return {
+      validation: true,
+      message: "",
+    };
+  } else {
+    return {
+      validation: false,
+      message: " must have a valid UAE phone number, ",
     };
   }
 }

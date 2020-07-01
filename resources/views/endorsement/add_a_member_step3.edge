@@ -42,26 +42,29 @@
 
     </tbody>
 </table>
+
 <script>
     $(document).ready(function() {
         $(".select2").select2({
             placeholder: "Select Category"
         });  
-        });  
-        $('form.categoryForm').submit(function(e) {
-                e.preventDefault();
-                var values = $(this).serialize();
-                console.log(values)
-                $.ajax({
-                url: "{{ route('addCategory') }}",
-                type: "post",
-                data: values ,
-                success: function (res) {
-                },
-                error: function(xhr, status, error) {
-                    alert('Something went wrong')
-                    console.log(xhr.responseText);
-                }
-            });
-        })
+    });  
+    $('form.categoryForm').submit(function(e) {
+            e.preventDefault();
+            var values = $(this).serialize();
+            console.log(values)
+            $.ajax({
+            url: "{{ route('addCategory') }}",
+            type: "post",
+            data: values ,
+            success: function (res) {
+            },
+            error: function(xhr, status, error) {
+                alert('Something went wrong')
+                console.log(xhr.responseText);
+            }
+        });
+    })
+
+
 </script>

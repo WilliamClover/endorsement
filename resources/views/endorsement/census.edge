@@ -1,0 +1,123 @@
+@layout('layout.app')
+@section('content')
+<style>
+    th {
+        min-width: 200px;
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
+    td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+</style>
+<h1 class="h3 mb-3">Census</h1>
+<div class="row">
+    <div class="col-12" style="overflow-x:scroll">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Policy</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Company Name</th>
+                    <th scope="col">Shop or Site or Department</th>
+                    <th scope="col">Employee Staff ID</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Second Name</th>
+                    <th scope="col">Family Name</th>
+                    <th scope="col">Relation</th>
+                    <th scope="col">DOB</th>
+                    <th scope="col">Gender</th>
+                    <th scope="col">Nationality</th>
+                    <th scope="col">Marital Status</th>
+                    <th scope="col">Cost Sharing</th>
+                    <th scope="col">Position</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col">Mobile No</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">NATIONAL ID</th>
+                    <th scope="col">SAUDI ID</th>
+                    <th scope="col">IQAMA NO.</th>
+                    <th scope="col">IQAMA EXPIRY DATE</th>
+                    <th scope="col">SPONSOR ID</th>
+                    <th scope="col">KUWAIT (KID)</th>
+                    <th scope="col">QATAR (QID)</th>
+                    <th scope="col">EMIRATES ID NO.</th>
+                    <th scope="col">PASSPORT NO.</th>
+                    <th scope="col">UID</th>
+                    <th scope="col">GDRFAFileNumber</th>
+                    <th scope="col">EMIRATE OF VISA ISSUANCE</th>
+                    <th scope="col">MEMBER TYPE</th>
+                    <th scope="col">ENTITY TYPE</th>
+                    <th scope="col">ESTABLISHMENT ID#</th>
+                    <th scope="col">Has the member been previously insured?</th>
+                    <th scope="col">RESIDENTIAL LOCATION</th>
+                    <th scope="col">WORK LOCATION</th>
+                    <th scope="col">EMPLOYEES SALARY BRACKET</th>
+                    <th scope="col">COMMISSION</th>
+                    <th scope="col">ENTITY CONTACT NUMBER</th>
+                    <th scope="col">ENTITY E-MAIL ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                @each(censusEntry in censusEntries)
+                <tr>
+                    <td>{{censusEntry.policy}}</td>
+                    <td>{{censusEntry.category}}</td>
+                    <td>{{censusEntry.company_name}}</td>
+                    <td>{{censusEntry.s_department}}</td>
+                    <td>{{censusEntry.employee_staff_id}}</td>
+                    <td>{{censusEntry.first_name}}</td>
+                    <td>{{censusEntry.second_name}}</td>
+                    <td>{{censusEntry.last_name}}</td>
+                    <td>{{censusEntry.relation}}</td>
+                    <td class="dateFormat">{{censusEntry.dob}}</td>
+                    <td>{{censusEntry.gender}}</td>
+                    <td>{{censusEntry.nationality}}</td>
+                    <td>{{censusEntry.marital_status}}</td>
+                    <td>{{censusEntry.cost_sharing}}</td>
+                    <td>{{censusEntry.position}}</td>
+                    <td>{{censusEntry.grade}}</td>
+                    <td>{{censusEntry.mobile}}</td>
+                    <td>{{censusEntry.email}}</td>
+                    <td>{{censusEntry.national_id}}</td>
+                    <td>{{censusEntry.saudi_id}}</td>
+                    <td>{{censusEntry.iqama_id}}</td>
+                    <td>{{censusEntry.iqama_expire_at}}</td>
+                    <td>{{censusEntry.sponsor_id}}</td>
+                    <td>{{censusEntry.kuwait_id}}</td>
+                    <td>{{censusEntry.qatar_id}}</td>
+                    <td>{{censusEntry.emirates_id}}</td>
+                    <td>{{censusEntry.passport_num}}</td>
+                    <td>{{censusEntry.uid}}</td>
+                    <td>{{censusEntry.gdrfa_file_number}}</td>
+                    <td>{{censusEntry.emirate_of_visa_issuance}}</td>
+                    <td>{{censusEntry.member_type}}</td>
+                    <td>{{censusEntry.entity_type}}</td>
+                    <td>{{censusEntry.establishment_id}}</td>
+                    <td>{{censusEntry.previously_insured}}</td>
+                    <td>{{censusEntry.residential_location}}</td>
+                    <td>{{censusEntry.work_location}}</td>
+                    <td>{{censusEntry.employees_salary_bracket}}</td>
+                    <td>{{censusEntry.commission}}</td>
+                    <td>{{censusEntry.entity_contact_number}}</td>
+                    <td>{{censusEntry.entity_email_id}}</td>
+                </tr>
+                @endeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+@section('javascript')
+<script>
+    $(document).ready(function(){
+        $(".dateFormat").each(function() {
+        var dateNewFormat=moment($(this).text()).format("DD MMMM YYYY")
+            $(this).text(dateNewFormat)
+        });
+    })
+</script>
+
+@endsection

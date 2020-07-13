@@ -1,0 +1,1709 @@
+<link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+<style>
+    .handsontable tbody th,
+    .handsontable thead th,
+    .handsontable tbody th.ht__active_highlight,
+    .handsontable thead th.ht__active_highlight {
+        background-color: #696969;
+        color: #fff;
+    }
+
+    #text-error {
+        color: #ff4c42
+    }
+
+    .table-responsive th {
+        min-width: 180px;
+    }
+
+    .table-responsive th:nth-child(2) {
+        min-width: 250px;
+    }
+
+    .table-responsive {
+        height: 200px;
+    }
+</style>
+@if(validContent.length!=0)
+<div class="mb-5">
+
+    <div class="card-header">
+        <h5 class="card-title">Valid Members</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    @each(colHeader in tableHeaders)
+                    <th>{{colHeader}}</th>
+                    @endeach
+                </tr>
+            </thead>
+            <tbody>
+                @each(rowBody in validContent)
+                <tr>
+                    @each(colBody in rowBody)
+                    <td>{{colBody}}</td>
+                    @endeach
+                </tr>
+                @endeach
+            </tbody>
+        </table>
+
+    </div>
+</div>
+@endif
+@if(invalidContent.length!=0)
+<div class="mb-5">
+
+    <div class="card-header">
+        <h5 class="card-title">Invalid Members</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    @each(colHeader in tableHeaders)
+                    <th>{{colHeader}}</th>
+                    @endeach
+                </tr>
+            </thead>
+            <tbody>
+                @each(rowBody in invalidContent)
+                <tr>
+                    @each(colBody in rowBody)
+                    <td>{{colBody}}</td>
+                    @endeach
+                </tr>
+                @endeach
+            </tbody>
+        </table>
+
+    </div>
+</div>
+@endif
+<div class="card mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div>
+                <h5 class="card-title">Invalid Members</h5>
+            </div>
+            <div id="datatables-hot">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div id="datatables-hot"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+{{ script('assets/js/hot-functions') }}
+<script>
+    $(function() {
+        
+        var tableHeaders = {{{ toJSON(tableHeaders) }}};
+
+        //var invalidCount
+        var min2ifNotEmpty = function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var min2=minLengthfunction(value,2)
+                    var lettersAndSpaces=lettersAndSpacesfunction(value)
+                    if (String(value).length != 0) {
+                        if(min2.validation==true && lettersAndSpaces.validation==true){
+                            callback(true)
+                            $("#text-error").text("")
+                        }else{
+                            callback(false)
+                            $("#text-error").text("The selected data field "+min2.message+lettersAndSpaces.message)
+                        }
+                    }else{
+                        callback(true);
+                        $("#text-error").text("")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        };
+        var notEmpty = function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                if(notEmpty.validation==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        };
+        var validEmailIfPrinciple = function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validEmail=validEmailfunction(value)
+                if(relationValue=="1= PRINCIPAL"){
+                    if(notEmpty.validation==true && validEmail.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
+                    }
+                }else{
+                    if(validEmail.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+validEmail.message+"</p>")
+                    }
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var namesValidation = function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var notEmpty=notEmptyfunction(value)
+                    var min2=minLengthfunction(value,2)
+                    var lettersAndSpaces=lettersAndSpacesfunction(value)
+                    if(notEmpty.validation==true && min2.validation==true && lettersAndSpaces.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+min2.message+lettersAndSpaces.message+"</p>")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var alphaNumericIfNotEmptyValidation = function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var alphaNumeric=alphaNumericfunction(value)
+                if (String(value).length != 0) {
+                    if(alphaNumeric.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+alphaNumeric.message+"</p>")
+                    }
+                }else{
+                    callback(true);
+                    $("#text-error").html("")
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var phoneNumberIfPrinciple = function (value, callback) {
+            
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var checkPhoneNumber=checkPhoneNumberfunction(value)
+                var notEmpty=notEmptyfunction(value)
+                if(relationValue=="1= PRINCIPAL"){
+                    if(notEmpty.validation==true){
+                        if(checkPhoneNumber.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
+                        }
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                    }
+                }else{
+                        if(checkPhoneNumber.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
+                        }
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var employeeStaffId= function (value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var min2=minLengthfunction(value,2)
+                var notEmpty=notEmptyfunction(value)
+                if(notEmpty.validation==true){
+                    if(min2.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+min2.message+"</p>")
+                    }
+                }else{
+                    if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                    }else{
+                        callback(true)
+                        $("#text-error").html("")
+                    }
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var positionField= function (value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var min3=minLengthfunction(value, 3)
+                var notEmpty=notEmptyfunction(value)
+                if(notEmpty.validation==true){
+                    if(min3.validation==true){
+                        callback(true)
+                        $("#text-error").text("")
+                    }else{
+                        callback(false)
+                        $("#text-error").text("The selected data field " + min3.message)
+                    }
+                }else{
+                    if(relationValue=="1= PRINCIPAL" && nationalityValue=="Kingdom Of Saudi Arabia"){
+                        callback(false)
+                        $("#text-error").text("The selected data field " + notEmpty.message)
+                    }else{
+                        callback(true)
+                        $("#text-error").text("")
+                    }
+                }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var acceptableDate=function(value,callback){
+            
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    const timestampFromValue=Date.parse(value);
+                    const currentTimestamp=Date.now()
+                    const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
+                    
+                    var validateDate=validateDatefunction(timestampFromValue)
+                    if(validateDate.validation==true){
+                        if(ageFromtimestamps>99 || ageFromtimestamps<0){
+                            callback(false)
+                            $("#text-error").html("Age should be from 0 to 99")
+                        }else{
+                            if(relationValue=="3= CHILD" && ageFromtimestamps>25){
+                                callback(false)
+                                $("#text-error").html("Only children under 25 are dependant")
+                            }else{
+                                callback(true)
+                                $("#text-error").html("")
+                            }
+                        }
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var emiratesIdNumber=function(value,callback){
+            
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var validIdNum=validIdNumFunction(value,18,3)
+                    if(validIdNum.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("The selected data field "+validIdNum.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var distinctNumbers=function(value,callback){
+            
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var distinctNumber=distinctNumberFunction(value)
+                    if(distinctNumber.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("The selected data field "+distinctNumber.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var uidNumbers=function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var uidNumber=uidNumberFunction(value,6,15)
+                    if(uidNumber.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("The selected data field "+uidNumber.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var gdrfaFileNumber=function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var validIdNum=validIdNumFunction(value,16,3)
+                    var notEmpty=notEmptyfunction(value)
+                    if(nationalityValue!="United Arab Emirates"){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        if(notEmpty.validation==true){
+                            callback(false)
+                            $("#text-error").html("You Should keep this field empty if you are emirati")
+                        }else{
+                            callback(true)
+                            $("#text-error").html("")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var memberTypesValidation=function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    const timestampFromValue=Date.parse(ageValue);
+                    const currentTimestamp=Date.now()
+                    const agePerDays=Math.floor((currentTimestamp-timestampFromValue) / (24 * 60 * 60 * 1000));
+                    var notEmpty=notEmptyfunction(value)
+                    if(notEmpty.validation==true){
+                        if(agePerDays<=31){
+                            if(value=="Newborn - Birth Certificate ID"){
+                                callback(true)
+                                $("#text-error").html("")
+                            }else{
+                                callback(false)
+                                $("#text-error").html("It is mandatory to choose 'Newborn - Birth Certificate ID' for children under 1 month")
+                            }
+                        }else{
+                            if(nationalityValue=="United Arab Emirates"){
+                                if(value=="UAE National – Emirates ID"){
+                                    callback(true)
+                                    $("#text-error").html("")
+                                }else{
+                                    callback(false)
+                                    $("#text-error").text("It is mandatory to choose 'UAE National – Emirates ID' for Emiratis")
+                                }
+                            }else if(nationalityValue=="Oman" || nationalityValue=="Bahrain" || nationalityValue=="Kuwait" || nationalityValue=="Qatar" || nationalityValue=="Kingdom Of Saudi Arabia"){
+                                if(value=="GCC National - Passport"){
+                                    callback(true)
+                                    $("#text-error").html("")
+                                }else{
+                                    callback(false)
+                                    $("#text-error").text("It is mandatory to choose 'GCC National - Passport' if you are from "+nationalityValue)
+                                }
+                            }else{
+                                if(uaeVisaIssuanceValue=="Ajman"){
+                                    if(value=="Expat who's residency is issued in Dubai - File Number"){
+                                        callback(true)
+                                        $("#text-error").html("")
+                                    }else{
+                                        callback(false)
+                                        $("#text-error").text("It is mandatory to choose 'Expat who's residency is issued in Dubai - File Number'")
+                                    }
+                                }else{
+                                    if(value=="Expat who's residency is issued in Emirates other than Dubai - File Number"){
+                                        callback(true)
+                                        $("#text-error").html("")
+                                    }else{
+                                        callback(false)
+                                        $("#text-error").text("It is mandatory to choose 'Expat who's residency is issued in Emirates other than Dubai - File Number'")
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        callback(false)
+                        $("#text-error").text("The selected data field " + notEmpty.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var entityTypesValidation=function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var notEmpty=notEmptyfunction(value)
+                    if(nationalityValue=="United Arab Emirates"){
+                        if(notEmpty.validation==false){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("This field should be empty for emiratis")
+                        }
+                    }else{
+                        if(notEmpty.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var estIdValidation=function(value,callback){
+            
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var notEmpty=notEmptyfunction(value)
+                    if(memberTypeValue=="UAE National – Emirates ID" || memberTypeValue=="GCC National - Passport"){
+                        if(notEmpty.validation==false){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("This field should be empty")
+                        }
+                    }else{
+                        if(notEmpty.validation==true){
+                            if(value==gdrfaValue){
+                                callback(false)
+                                $("#text-error").html("This field should not be equal to the GDRFAFileNUmber value")
+                            }else{
+                                if(entityTypeValue=="Resident" || entityTypeValue=="Investor Visa"){
+                                    var validIdNum=validIdNumFunction(value,13,3)
+                                    if(validIdNum.validation==true){
+                                        callback(true)
+                                        $("#text-error").html("")
+                                    }else{
+                                        callback(false)
+                                        $("#text-error").html("The selected data field "+validIdNum.message)
+                                    }
+
+                                }else if(entityTypeValue=="UAE Citizen" || entityTypeValue=="GCC Citizen"){
+                                    var uidNumber=uidNumberFunction(value,6,15)
+                                    if(uidNumber.validation==true){
+                                        callback(true)
+                                        $("#text-error").html("")
+                                    }else{
+                                        callback(false)
+                                        $("#text-error").html("The selected data field "+uidNumber.message)
+                                    }
+                                }else{
+                                    var uidNumber=uidNumberFunction(value,9,11)
+                                    if(uidNumber.validation==true){
+                                        callback(true)
+                                        $("#text-error").html("")
+                                    }else{
+                                        callback(false)
+                                        $("#text-error").html("The selected data field "+uidNumber.message)
+                                    }
+                                }
+                                callback(true)
+                                $("#text-error").html("")
+                            }
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+notEmpty.message)
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var UAEnumFormat=function(value,callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    var UAEnumFormat=UAEnumFormatfunction(value)
+                    if(UAEnumFormat.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+UAEnumFormat.message+"</p>")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var validEmailAndMandatory = function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validEmail=validEmailfunction(value)
+                    if(notEmpty.validation==true && validEmail.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var nationalIdValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validIdNum=validIdNumFunction(value,10,3)
+                    if(notEmpty.validation==true){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        if(nationalityValue=="Jordan"){
+                            callback(false)
+                            $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                        }else{
+                            callback(true)
+                            $("#text-error").html("")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var saudiIdValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validIdNum=validIdNumFunction(value,10,3)
+                    if(notEmpty.validation==true){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        if(nationalityValue=="Kingdom Of Saudi Arabia"){
+                            callback(false)
+                            $("#text-error").html("The selected data field "+notEmpty.message)
+                        }else{
+                            callback(true)
+                            $("#text-error").html("")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var iqamaIdValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validIdNum=validIdNumFunction(value,10,3)
+                    if(notEmpty.validation==true){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        if(nationalityValue!="Kingdom Of Saudi Arabia"){
+                            callback(false)
+                            $("#text-error").html("The selected data field "+notEmpty.message)
+                        }else{
+                            callback(true)
+                            $("#text-error").html("")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var iqamaDateValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                const timestampFromValue=Date.parse(value);
+                var validateDate=validateDatefunction(timestampFromValue)
+                    if(notEmpty.validation==true){
+                        if(validateDate.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
+                        }
+                    }else{
+                        if(nationalityValue=="Kingdom Of Saudi Arabia"){
+                            callback(false)
+                            $("#text-error").html("The selected data field "+notEmpty.message)
+                        }else{
+                            callback(true)
+                            $("#text-error").html("")
+                        }
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var kIdValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validIdNum=validIdNumFunction(value,12,3)
+                    if(notEmpty.validation==true){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        callback(false)
+                        $("#text-error").html("The selected data field "+notEmpty.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var qIdValidation= function (value, callback) {
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                var notEmpty=notEmptyfunction(value)
+                var validIdNum=validIdNumFunction(value,11,3)
+                    if(notEmpty.validation==true){
+                        if(validIdNum.validation==true){
+                            callback(true)
+                            $("#text-error").html("")
+                        }else{
+                            callback(false)
+                            $("#text-error").html("The selected data field "+validIdNum.message)
+                        }
+                    }else{
+                        callback(false)
+                        $("#text-error").html("The selected data field "+notEmpty.message)
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        var statusValidation= function(value, callback){
+            if(emptyRow){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(value){
+                    if(value!="2= MARRIED" && relationValue=="2= SPOUSE"){
+                        callback(false)
+                        $("#text-error").html("Spouse can only be married")
+                    }else if(value!="1= SINGLE" && relationValue=="3= CHILD"){
+                        callback(false)
+                        $("#text-error").html("Child can only be single")
+                    }else{
+                        callback(true)
+                        $("#text-error").html("")
+                    }
+                }else{
+                    callback(false)
+                    $("#text-error").html("This field is mandatory")
+                }
+            }
+        }
+        cor = cor.toUpperCase()
+        var dataFromStep1 = {{{ toJSON(invalidContent) }}};
+        var columnsFromCOR=[
+            {data: tableHeaders[0], type: 'text'},
+            {data: tableHeaders[1], type: "text", validator:notEmpty ,allowInvalid: true},
+            {data: tableHeaders[2], type: "text", validator:employeeStaffId ,allowInvalid: true},
+            {data: tableHeaders[3], type: "text", validator:namesValidation ,allowInvalid: true},
+            {data: tableHeaders[4], type: "text", validator:min2ifNotEmpty ,allowInvalid: true},
+            {data: tableHeaders[5], type: "text", validator:namesValidation ,allowInvalid: true},
+            {data: tableHeaders[6], type: 'text'},
+            {data: tableHeaders[7], type: "date",dateFormat:'MM/DD/YYYY', correctFormat: true, validator:acceptableDate ,allowInvalid: true},
+            {data: tableHeaders[8], type: 'text',allowInvalid: true},
+            {data: tableHeaders[9], type: 'text', allowInvalid: true},
+            {data: tableHeaders[10], type: 'text', validator:statusValidation ,allowInvalid: true},
+            {data: tableHeaders[11], type: 'text', allowInvalid: true},
+            {data: tableHeaders[12], type: "text", validator:positionField ,allowInvalid: true},
+            {data: tableHeaders[13], type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true},
+            {data: tableHeaders[14], type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true},
+            {data: tableHeaders[15], type: "text", validator:validEmailIfPrinciple ,allowInvalid: true},
+        
+        ]
+        if(cor=='DUBAI' || cor=='DUBAI LSB'){
+            columnsFromCOR.push(
+                {data: tableHeaders[16], type: "text", validator:emiratesIdNumber ,allowInvalid: true},
+                {data: tableHeaders[17], type: "text", validator:distinctNumbers ,allowInvalid: true},
+                {data: tableHeaders[18], type: "text", validator:uidNumbers ,allowInvalid: true},
+                {data: tableHeaders[19], type: "text", validator:gdrfaFileNumber ,allowInvalid: true},
+                {data: tableHeaders[20], type: 'text', source:emirates, validator:notEmpty ,allowInvalid: true},
+                {data: tableHeaders[21], type: 'text', validator:memberTypesValidation ,allowInvalid: true},
+                {data: tableHeaders[22], type: 'text',validator:entityTypesValidation ,allowInvalid: true},
+                {data: tableHeaders[23], type: 'text', validator:estIdValidation ,allowInvalid: true},
+                {data: tableHeaders[24], type: 'text',residentialLocations, validator:notEmpty ,allowInvalid: true},
+                {data: tableHeaders[25], type: 'text', validator:notEmpty ,allowInvalid: true},
+                {data: tableHeaders[26], type: 'text', validator:notEmpty ,allowInvalid: true},
+                {data: tableHeaders[27], type: 'text', validator:notEmpty ,allowInvalid: true},
+                {data: tableHeaders[28], type: "text", validator:UAEnumFormat ,allowInvalid: true},
+                {data: tableHeaders[29], type: "text", validator:validEmailAndMandatory ,allowInvalid: true})
+
+        }else if(cor=='AUH'){
+            columnsFromCOR.push(
+                {data: tableHeaders[16], type: "text", validator:emiratesIdNumber ,allowInvalid: true},
+                {data: tableHeaders[17], type: "text", validator:distinctNumbers ,allowInvalid: true},
+                {data: tableHeaders[18], type: "text", validator:uidNumbers ,allowInvalid: true},
+                {data: tableHeaders[19], type: 'text'})
+        }else if(cor=='OTHER EMIRATES'){
+            columnsFromCOR.push(
+                {data: tableHeaders[16], type: "text", validator:emiratesIdNumber ,allowInvalid: true},
+                {data: tableHeaders[17], type: "text", validator:distinctNumbers ,allowInvalid: true},
+                {data: tableHeaders[18], type: "text", validator:uidNumbers ,allowInvalid: true},
+            )
+        }else if(cor=='JORDAN'){
+            columnsFromCOR.push(
+                {data: tableHeaders[16], type: "text", validator:nationalIdValidation ,allowInvalid: true})
+        }else if(cor=='KSA'){
+            columnsFromCOR.push(
+                {data: tableHeaders[16], type: "text", validator:saudiIdValidation ,allowInvalid: true},
+                {data: tableHeaders[17], type: "text", validator:iqamaIdValidation ,allowInvalid: true},
+                {data: tableHeaders[18], type: "date", validator:iqamaDateValidation ,allowInvalid: true},
+                {data: tableHeaders[19], type: "text", validator:iqamaIdValidation ,allowInvalid: true})
+        }else if(cor=='KUWAIT'){
+            columnsFromCOR.push({data: tableHeaders[16], type: "text", validator:kIdValidation ,allowInvalid: true})
+        }else if(cor=='QATAR'){
+            columnsFromCOR.push({data: tableHeaders[16], type: "text", validator:qIdValidation ,allowInvalid: true})
+        }else{
+        }
+        // console.log("tableHeaders",tableHeaders)
+        // console.log("dataFromStep1",dataFromStep1)
+        // console.log("columnsFromCOR",columnsFromCOR)
+        var hot = new Handsontable(document.getElementById('datatables-hot'), {
+            data: dataFromStep1,
+            colHeaders: tableHeaders,
+            columns: columnsFromCOR,
+            minSpareRows: 0,
+            rowHeaders: false,
+            columnSorting: true,
+            manualRowMove: true,
+            width: "100%",
+            height: 200,
+            colWidths: 200,
+            manualColumnResize: true,
+            afterGetColHeader: function(index, TH) {
+
+                switch (TH.textContent) {
+                    case "Company Name":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Shop or Site or Department":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Employee Staff ID":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "First Name":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Second Name":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Family Name":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Relation":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "DOB":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Gender":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Nationality":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Marital Status":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Cost Sharing":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Position":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Grade":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Mobile No":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "E-mail":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "EMIRATES ID NO.":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "PASSPORT NO.":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "UID":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "Has the member been previously insured?":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "NATIONAL ID":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "SAUDI ID":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "IQAMA NO.":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "IQAMA EXPIRY DATE":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "SPONSOR ID":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "KUWAIT (KID)":
+                        validationTooltip = "This field is mandatory";
+                        break;
+                    case  "QATAR (QID)":
+                    validationTooltip = "This field is mandatory";
+                }
+                TH.children[0].title = validationTooltip;
+            },
+            afterValidate: function(isValid, value, row, prop, source){
+                if(source=="validateCells"){
+                    validationArray.push(row)
+                    allDataArray.push({row:row,cells:{isValid:isValid,prop:prop, value:value}})
+                }
+            }
+        });
+        var exportPlugin = hot.getPlugin('exportFile');
+        
+        downloadCsv.addEventListener('click', function() {
+            exportPlugin.downloadFile('csv', {
+            columnHeaders: true,        // default false, exports the column headers
+            filename: 'Add a member in '+cor+' [DD]-[MM]-[YYYY]'
+            });
+        });
+        hot.updateSettings({
+            afterChange: function (change, source) {
+                validationArray=[]
+                //invalidCount=0
+                var tableData = hot.getData();
+                var tableRow = tableData.length-1;
+                relationValue=hot.getDataAtCell(change[0][0],6)
+                nationalityValue=hot.getDataAtCell(change[0][0],9)
+                ageValue=hot.getDataAtCell(change[0][0],7)
+                gdrfaValue=hot.getDataAtCell(change[0][0],19)
+                uaeVisaIssuanceValue=hot.getDataAtCell(change[0][0],20)
+                memberTypeValue=hot.getDataAtCell(change[0][0],21)
+                entityTypeValue=hot.getDataAtCell(change[0][0],22)
+                if(change[0][1]=="Relation"){
+                    if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
+                        hot.setCellMeta(change[0][0],12, 'readOnly', true)
+                        hot.setCellMeta(change[0][0],13, 'readOnly', true)
+                        hot.setCellMeta(change[0][0],12, 'className', "htDisabled")
+                        hot.setCellMeta(change[0][0],13, 'className', "htDisabled")
+                        hot.setDataAtCell(change[0][0],12,"");
+                        hot.setDataAtCell(change[0][0],13,"");
+                    }else if(relationValue=="1= PRINCIPAL"){
+                        hot.setCellMeta(change[0][0],12, 'readOnly', false)
+                        hot.setCellMeta(change[0][0],13, 'readOnly', false)
+                        hot.setCellMeta(change[0][0],12, 'className', "")
+                        hot.setCellMeta(change[0][0],13, 'className', "")
+                        hot.setDataAtCell(change[0][0],12,"");
+                        hot.setDataAtCell(change[0][0],13,"");
+                    }
+                }
+                $("#step2Submit").fadeIn();
+            }
+        })
+        hot.addHook('beforeValidate', function(val, row, prop) {
+                emptyRow=hot.isEmptyRow(row)
+        });
+        // Handsontable.dom.addEvent(document.getElementById('step2Submit'), 'click', async function() {
+ 
+        //     var validArray = [];
+        //     var invalidArray = [];
+        //     var newArray = [];
+        //     var oldRow=0
+        //     let validMembers=[]
+        //     let invalidMembers=[]
+        //     let invalidRows=[]
+        //     hot.validateCells(function(hotIsValid) {
+        //         allDataArray.forEach(item => {
+        //             var newItem = [];
+        //             allDataArray.forEach(innerItem => {
+        //                 if(innerItem.row == item.row){
+        //                     newItem = newItem.concat(innerItem.cells);
+        //                 }
+        //             });
+        //             if(oldRow!=item.row){
+        //                 newArray.push(newItem);
+        //                 oldRow=item.row
+        //             }
+        //         });
+        //         let allFilledRows = newArray.slice(4)
+        //         allFilledRows.forEach((filledRow,index) => {
+        //                 for (i=0; i<filledRow.length; i++) {
+        //                     if (filledRow[i].isValid==false){
+        //                         invalidMembers.push(filledRow)
+        //                         invalidRows.push(index)
+        //                         break;
+        //                     }
+        //                 };
+        //         })
+        //         console.log(invalidRows.length,allFilledRows)
+        //         if(invalidRows.length==0){
+        //             allFilledRows.forEach((filledRow,index) => {
+        //                 validMembers.push(allFilledRows[index])
+        //             })
+        //         }else{
+        //             invalidRows.forEach((invalidIndex) => {
+        //                 allFilledRows.forEach((filledRow,index) => {
+        //                     if(index!=invalidIndex){
+        //                         validMembers.push(allFilledRows[index])
+        //                     }
+        //                 })
+        //             })
+        //         }
+        //     })
+        //     setTimeout(function(){
+        //         let notValidatedRowsIndex = [...new Set(validationArray)];
+        //         var tableData = hot.getData();
+        //         var tableHeader = hot.getColHeader();
+        //         var dataArray={master:master,cor:cor,web_req_id:webReqId,tableHeaders:tableHeaders,data:[],dataError:[],dataCategories:[],validData:[]};
+        //         var dataArray1={master:master,cor:cor,web_req_id:webReqId,dataInvalid:invalidMembers,dataValid:validMembers};
+        //         var addHealthTempId=0;
+        //         //dataArray.dataInvalid=invalidMembers
+
+        //         if(cor=='DUBAI' || cor=='DUBAI LSB'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         validData=updatedData;
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             emirates_id: updatedData[16],
+        //                             passport_num: updatedData[17],
+        //                             uid: updatedData[18],
+        //                             gdrfa_file_number: updatedData[19],
+        //                             emirate_of_visa_issuance: updatedData[20],
+        //                             member_type: updatedData[21],
+        //                             entity_type: updatedData[22],
+        //                             establishment_id: updatedData[23],
+        //                             residential_location: updatedData[24],
+        //                             work_location: updatedData[25],
+        //                             employees_salary_bracket: updatedData[26],
+        //                             commission: updatedData[27],
+        //                             entity_contact_number: updatedData[28],
+        //                             entity_email_id: updatedData[29],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else if(cor=='AUH'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             emirates_id: updatedData[16],
+        //                             passport_num: updatedData[17],
+        //                             uid: updatedData[18],
+        //                             previously_insured: updatedData[19],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else if(cor=='OTHER EMIRATES'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             emirates_id: updatedData[16],
+        //                             passport_num: updatedData[17],
+        //                             uid: updatedData[18],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else if(cor=='JORDAN'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master,
+        //                             web_req_id:webReqId,
+        //                             Add_health_temp_id:addHealthTempId
+        //                         })
+                                
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //                 console.log("ffffffffffffffffffffffffffffffffffffffff",dataArray)
+        //         }else if(cor=='KSA'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             saudi_id: updatedData[16],
+        //                             iqama_id: updatedData[17],
+        //                             iqama_expire_at: updatedData[18],
+        //                             sponsor_id: updatedData[19],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else if(cor=='KUWAIT'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             kuwait_id : updatedData[16],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else if(cor=='QATAR'){
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             qatar_id: updatedData[16],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }else{
+        //             tableData.forEach(function(updatedData,rowIndex){
+        //                 var validatedRow=0
+        //                 notValidatedRowsIndex.forEach(function(rowIndexNotValidated){
+        //                     if(rowIndex==rowIndexNotValidated) validatedRow++
+        //                 })
+        //                 if(validatedRow==0){
+        //                     addHealthTempId++;
+        //                     if(updatedData[0]!=null){
+        //                         var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+        //                         dataArray.data.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             contact:contact,
+        //                             master: master,
+        //                             web_req_id:webReqId
+        //                         })
+        //                         var curHeaderArray=[]
+        //                         tableHeaderArray.forEach(function(headerCont,index){
+        //                             var category=categoriesArray[index]
+        //                             curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+        //                         })
+        //                         dataArray.dataCategories.push(curHeaderArray)
+        //                     }
+        //                 }else{
+        //                     if(updatedData[0]!=null){
+        //                         dataArray.dataError.push({
+        //                             company_name: updatedData[0],
+        //                             s_department: updatedData[1],
+        //                             employee_staff_id: updatedData[2],
+        //                             first_name: updatedData[3],
+        //                             second_name: updatedData[4],
+        //                             last_name: updatedData[5],
+        //                             relation: updatedData[6],
+        //                             dob: "2020-01-19 03:14:07",
+        //                             gender: updatedData[8],
+        //                             nationality: updatedData[9],
+        //                             marital_status: updatedData[10],
+        //                             cost_sharing: updatedData[11],
+        //                             position: updatedData[12],
+        //                             grade: updatedData[13],
+        //                             mobile: updatedData[14],
+        //                             email: updatedData[15],
+        //                             national_id: updatedData[16],
+        //                             contact: contact,
+        //                             master: master
+        //                         })
+        //                     }
+        //                 }
+        //             })
+        //         }
+        //         $.ajax({
+        //             url: "{{ route('saveMember') }}",
+        //             type: "post",
+        //             data:  {data:dataArray},
+        //             success: function (res) {
+        //                 $("#smartwizard-arrows-primary").smartWizard("next");
+        //             },
+        //             error: function(xhr, status, error) {
+        //                 alert('Something went wrong')
+        //                 console.log(xhr.responseText);
+        //             }
+        //         });
+        
+        //     }, 1000);
+        // })
+
+    
+    
+    })
+</script>

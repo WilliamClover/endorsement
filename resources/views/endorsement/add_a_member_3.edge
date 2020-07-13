@@ -1,0 +1,41 @@
+<div class="row text-center">
+    <div class="col-12">
+        <h3 class="card-title">Please submit needed documentations for the following persons:</h3><br />
+    </div>
+    <div class="col-12 col-md-6 mx-auto">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Company Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+
+                    @each(submittedEntry in submittedEntries)
+                <tr>
+                    <td>{{submittedEntry.first_name}} {{submittedEntry.last_name}}</td>
+                    <td>{{submittedEntry.company_name}}</td>
+                </tr>
+                @endeach
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-12">
+        <form method="POST" action="{{ route('step3Upload') }}" enctype="multipart/form-data">
+            <div class="row text-center">
+                <div class="col-12 col-md-6 mx-auto">
+                    {{ csrfField() }}
+                    <input type="file" name="profile_pics[]" multiple />
+                    <button class="btn btn-primary float-right" id="step2Submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+</script>

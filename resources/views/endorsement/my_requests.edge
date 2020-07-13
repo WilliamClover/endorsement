@@ -1,358 +1,241 @@
 @layout('layout.app')
 @section('content')
-<h1 class="h3 mb-3">My Pending Requests</h1>
-<div class="row">
-    <div class="col-12">
-        <div class="accordion" id="myPendingRequests">
-            <div class="card mb-4">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myPendingRequests1"
-                    aria-expanded="true" aria-controls="myPendingRequests1">
-                    <h5 class="card-title mb-0">Endorsement ID &nbsp; &nbsp; <span class="badge badge-warning">Waiting
-                            Approval</span>
-                        date of endorsement - policy
-                    </h5>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+<div id="requestsContainer">
+    <h1 class="h3 mb-3">Ongoing Requests</h1>
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="accordion" id="myPendingRequests">
+                @each(webReqId in webReqIdDbOngoing)
+                <div class="card mb-1">
+                    <div class="card-header" data-toggle="collapse"
+                        data-target="#myPendingRequests{{webReqId.web_req_id}}" aria-expanded="true"
+                        aria-controls="myPendingRequests{{webReqId.web_req_id}}">
+                        <h5 class="card-title mb-0">{{webReqId.web_req_id}} &nbsp;- &nbsp; 17 June 2020</h5>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
 
-                </div>
-                <div id="myPendingRequests1" class="collapse" aria-labelledby="headingOne"
-                    data-parent="#myPendingRequests">
-                    <table id="datatables-clients" class="table table-striped" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Date of ticket</th>
-                                <th>Name</th>
-                                <th>Company name</th>
-                                <th>Employee ID</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2345445664</td>
-                                <th>13/4/2020</th>
-                                <td>Ashton Cox</td>
-                                <td>Levitz Furniture</td>
-                                <td>23454-45664</td>
-                                <th> - </th>
-                            </tr>
-                            <tr>
-                                <td>2345445664</td>
-                                <th>13/4/2020</th>
-                                <td>Sonya Frost</td>
-                                <td>Child World</td>
-                                <td>23454-45664</td>
-                                <th> - </th>
-                            </tr>
-                            <tr>
-                                <td>2345445664</td>
-                                <th>13/4/2020</th>
-                                <td>Jena Gaines</td>
-                                <td>Helping Hand</td>
-                                <td>23454-45664</td>
-                                <th> - </th>
-                            </tr>
+                    </div>
+                    <div id="myPendingRequests{{webReqId.web_req_id}}" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#myPendingRequests">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="accordion mx-auto" id="myPendingRequestsSub" style="width:95%">
 
+                                    @set('x', '')
+                                    @each(policyId in policyOngoingIdDb)
+                                    @if(policyId.web_req_id === $parent.webReqId.web_req_id)
+                                    @if(x != policyId.policy_id)
+                                    @set('x', policyId.policy_id)
+                                    <div class="card accSub">
+                                        <div class="card-header collapsed" data-toggle="collapse"
+                                            data-target="#myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
+                                            aria-expanded="true"
+                                            aria-controls="myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}">
+                                            <h5 class="card-title mb-0"><span
+                                                    class="badge badge-warning">Waiting&nbsp;Approval</span>&nbsp;&nbsp;{{policyId.policy_id}}
+                                                &nbsp;- &nbsp; PSE33455
 
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                                            </h5>
+                                            <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                                            <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
 
-<h1 class="h3 mb-3">My Completed Requests</h1>
-<div class="row">
+                                        </div>
+                                        <div id="myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
+                                            class="collapse" aria-labelledby="headingOne"
+                                            data-parent="#myPendingRequestsSub">
+                                            <table id="datatables-clients" class="table table-striped table-bordered"
+                                                style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Full Name</th>
+                                                        <th>Company name</th>
+                                                        <th>Employee ID</th>
+                                                        <th>Gender</th>
+                                                        <th>DOB</th>
+                                                        <th>Relation</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @each(ongoingRequest in ongoingRequests)
+                                                    @if(ongoingRequest.web_req_id===$parent.policyId.web_req_id)
+                                                    <tr>
+                                                        <td>{{ongoingRequest.first_name}} {{ongoingRequest.last_name}}
+                                                        </td>
+                                                        <th>{{ongoingRequest.company_name}}</th>
+                                                        <td>{{ongoingRequest.employee_staff_id}}</td>
+                                                        <td>{{ongoingRequest.gender}}</td>
+                                                        <td class="dateFormat">{{ongoingRequest.dob}}</td>
+                                                        <th>{{ongoingRequest.relation}}</th>
+                                                    </tr>
+                                                    @endif
+                                                    @endeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    @endif
+                                    @endif
+                                    @endeach
 
-    <div class="col-12">
-
-        <div class="accordion" id="myCompletedRequests">
-            <div class="card mb-1">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests1"
-                    aria-expanded="true" aria-controls="myCompletedRequests1">
-                    <h5 class="card-title mb-0">Azadea Dubai</h5>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="myCompletedRequests1" class="collapse" aria-labelledby="headingOne"
-                    data-parent="#myCompletedRequests">
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Clover payment</th>
-                                <th scope="col">Policy ID</th>
-                                <th scope="col">LOB</th>
-                                <th scope="col">Supplier</th>
-                                <th scope="col">Currency</th>
-                                <th scope="col">COR</th>
-                                <th scope="col">Policyholder</th>
-                                <th scope="col">Eff date</th>
-                                <th scope="col">Exp Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">P1</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P2</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P3</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-1">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests2"
-                    aria-expanded="true" aria-controls="myCompletedRequests2">
-                    <h5 class="card-title mb-0">Azadea Lebanon</h5>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
-                </div>
-                <div id="myCompletedRequests2" class="collapse" aria-labelledby="headingOne"
-                    data-parent="#myCompletedRequests">
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Clover payment</th>
-                                <th scope="col">Policy ID</th>
-                                <th scope="col">LOB</th>
-                                <th scope="col">Supplier</th>
-                                <th scope="col">Currency</th>
-                                <th scope="col">COR</th>
-                                <th scope="col">Policyholder</th>
-                                <th scope="col">Eff date</th>
-                                <th scope="col">Exp Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">P1</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P2</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P3</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-4">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myCompletedRequests3"
-                    aria-expanded="true" aria-controls="myCompletedRequests3">
-                    <h5 class="card-title mb-0">Azadea Jordan</h5>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
-                </div>
-                <div id="myCompletedRequests3" class="collapse" aria-labelledby="headingOne"
-                    data-parent="#myCompletedRequests">
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Clover payment</th>
-                                <th scope="col">Policy ID</th>
-                                <th scope="col">LOB</th>
-                                <th scope="col">Supplier</th>
-                                <th scope="col">Currency</th>
-                                <th scope="col">COR</th>
-                                <th scope="col">Policyholder</th>
-                                <th scope="col">Eff date</th>
-                                <th scope="col">Exp Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">P1</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P2</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P3</th>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                                <td>Cell</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                @endeach
             </div>
         </div>
     </div>
 
-</div>
 
-<h1 class="h3 mb-3">My Rejected Members</h1>
-<div class="row">
-    <div class="col-12">
-        <div class="accordion" id="myRejectedRequests">
-            <div class="card mb-4">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myRejectedRequests1"
-                    aria-expanded="true" aria-controls="myRejectedRequests1">
-                    <h5 class="card-title mb-0">Azadea Dubai</h5>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                    <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+    <h1 class="h3 mb-3">My Completed Requests</h1>
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="accordion" id="myCompletedRequests">
+                @each(webReqId in webReqIdDbCompleted)
+                <div class="card mb-1">
+                    <div class="card-header" data-toggle="collapse"
+                        data-target="#myCompletedRequests{{webReqId.web_req_id}}" aria-expanded="true"
+                        aria-controls="myCompletedRequests{{webReqId.web_req_id}}">
+                        <h5 class="card-title mb-0">{{webReqId.web_req_id}} &nbsp;- &nbsp; 17 June 2020</h5>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+                    </div>
+                    <div id="myCompletedRequests{{webReqId.web_req_id}}" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#myCompletedRequests">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="accordion mx-auto" id="myCompletedRequestsSub" style="width:95%">
+
+                                    @set('x', '')
+                                    @each(policyId in policyCompletedIdDb)
+                                    @if(policyId.web_req_id === $parent.webReqId.web_req_id)
+                                    @if(x != policyId.policy_id)
+                                    @set('x', policyId.policy_id)
+                                    <div class="card accSub">
+                                        <div class="card-header collapsed" data-toggle="collapse"
+                                            data-target="#myCompletedRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
+                                            aria-expanded="true"
+                                            aria-controls="myCompletedRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}">
+                                            <h5 class="card-title mb-0"><span
+                                                    class="badge badge-success">Completed</span>&nbsp;&nbsp;{{policyId.policy_id}}
+                                                &nbsp;- &nbsp; PSE33455
+
+                                            </h5>
+                                            <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                                            <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+                                        </div>
+                                        <div id="myCompletedRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
+                                            class="collapse" aria-labelledby="headingOne"
+                                            data-parent="#myCompletedRequestsSub">
+                                            <table id="datatables-clients" class="table table-striped table-bordered"
+                                                style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Full Name</th>
+                                                        <th>Company name</th>
+                                                        <th>Employee ID</th>
+                                                        <th>Gender</th>
+                                                        <th>DOB</th>
+                                                        <th>Relation</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @each(CompletedRequest in completedRequests)
+                                                    @if(CompletedRequest.web_req_id===$parent.policyId.web_req_id)
+                                                    <tr>
+                                                        <td>{{CompletedRequest.first_name}}
+                                                            {{CompletedRequest.last_name}}
+                                                        </td>
+                                                        <th>{{CompletedRequest.company_name}}</th>
+                                                        <td>{{CompletedRequest.employee_staff_id}}</td>
+                                                        <td>{{CompletedRequest.gender}}</td>
+                                                        <td class="dateFormat">{{CompletedRequest.dob}}</td>
+                                                        <th>{{CompletedRequest.relation}}</th>
+                                                    </tr>
+                                                    @endif
+                                                    @endeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    @endif
+                                    @endif
+                                    @endeach
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="myRejectedRequests1" class="collapse" aria-labelledby="headingOne"
-                    data-parent="#myRejectedRequests">
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Policy ID</th>
-                                <th scope="col">LOB</th>
-                                <th scope="col">Reason of rejection</th>
-                                <th scope="col">Rejection date</th>
-                                <th scope="col" width="150"></th>
-                                <th scope="col" width="200"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">P1</th>
-                                <td>William elTurk</td>
-                                <td>43434345 45545</td>
-                                <td>Health</td>
-                                <td>Cell</td>
-                                <td>12/4/2020</td>
-                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
-                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P2</th>
-                                <td>William elTurk</td>
-                                <td>43434345 45545</td>
-                                <td>Health</td>
-                                <td>Cell</td>
-                                <td>12/4/2020</td>
-                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
-                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P3</th>
-                                <td>William elTurk</td>
-                                <td>43434345 45545</td>
-                                <td>Health</td>
-                                <td>Cell</td>
-                                <td>12/4/2020</td>
-                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
-                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P4</th>
-                                <td>William elTurk</td>
-                                <td>43434345 45545</td>
-                                <td>Health</td>
-                                <td>Cell</td>
-                                <td>12/4/2020</td>
-                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
-                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">P5</th>
-                                <td>William elTurk</td>
-                                <td>43434345 45545</td>
-                                <td>Health</td>
-                                <td>Cell</td>
-                                <td>12/4/2020</td>
-                                <td><button class="btn btn-success"><i class="fas fa-check"></i> Resubmit</button></td>
-                                <td><button class="btn btn-danger"><i class="fas fa-times"></i> Delete forever</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                @endeach
+            </div>
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3">My Rejected Members</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="accordion" id="myRejectedRequests">
+                <div class="card mb-4">
+                    <div class="card-header collapsed" data-toggle="collapse" data-target="#myRejectedRequests1"
+                        aria-expanded="true" aria-controls="myRejectedRequests1">
+                        <h5 class="card-title mb-0">Azadea Dubai</h5>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+                    </div>
+                    <div id="myRejectedRequests1" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#myRejectedRequests">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Policy ID</th>
+                                    <th scope="col">Full Name</th>
+                                    <th scope="col">LOB</th>
+                                    <th scope="col">Reason of rejection</th>
+                                    <th scope="col">Rejection date</th>
+                                    <th scope="col" width="150"></th>
+                                    <th scope="col" width="200"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @each(rejectedPerson in personDbRejected)
+                                <tr>
+                                    <td>{{rejectedPerson.policy_id}}</td>
+                                    <td>{{rejectedPerson.first_name}} {{rejectedPerson.last_name}}</td>
+                                    <td>Health</td>
+                                    <td>{{rejectedPerson.reason}}</td>
+                                    <td class="dateFormat">{{rejectedPerson.rejection_date}}</td>
+                                    <td>
+                                        <form action="{{ route('resubmitRejectedPerson') }}" method="post">
+                                            <input type="hidden" name="web_req_id"
+                                                value="{{rejectedPerson.web_req_id}}" />
+                                            <input type="hidden" name="Add_health_temp_id"
+                                                value="{{rejectedPerson.Add_health_temp_id}}" />
+                                            <input type="hidden" name="policy_id"
+                                                value="{{rejectedPerson.policy_id}}" />
+                                            <input type="hidden" name="reason" value="{{rejectedPerson.reason}}" />
+                                            <button class="btn btn-success resubmitRejectedPerson" type="submit"><i
+                                                    class="fas fa-check"></i>
+                                                Resubmit</button>
+                                        </form>
+
+
+                                    </td>
+                                    <td><button class="btn btn-danger deleteRejectedPerson"
+                                            data-webreqid="{{rejectedPerson.web_req_id}}"
+                                            data-addhealthtempid="{{rejectedPerson.Add_health_temp_id}}"><i
+                                                class="fas fa-times"></i> Delete
+                                            forever</button>
+                                    </td>
+                                </tr>
+                                @endeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,4 +245,34 @@
 
 
 @section('javascript')
+<script>
+    $(document).ready(function(){
+        $(".dateFormat").each(function() {
+        var dateNewFormat=moment($(this).text()).format("DD MMMM YYYY")
+            $(this).text(dateNewFormat)
+        });
+        $(".deleteRejectedPerson").click(function(e){
+            var dataArray=[]
+            dataArray.push({
+                web_req_id:$( this ).data( "webreqid" ),
+                Add_health_temp_id:$( this ).data( "addhealthtempid" )
+            })
+            var parentTrToHide=$(this).parent("td").parent("tr")
+                $.ajax({
+                    url: "{{ route('deleteRejectedPerson') }}",
+                    type: "post",
+                    data:  {data:dataArray},
+                    success: function (res) {
+                        alert(res)
+                        parentTrToHide.hide()
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+            
+        })
+    })
+</script>
 @endsection

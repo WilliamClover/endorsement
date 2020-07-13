@@ -139,7 +139,21 @@ body {
 .toast-top-center {
   top: 20px;
 }
-
+.accSub {
+  border: 1px solid #0001 !important;
+}
 .iti--separate-dial-code {
   width: 100%;
+}
+.handsontable tbody th,
+.handsontable thead th,
+.handsontable tbody th.ht__highlight,
+.handsontable thead th.ht__highlight,
+.handsontable tbody th.ht__active_highlight,
+.handsontable thead th.ht__active_highlight {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+.handsontable span.colHeader {
+  font-weight: bold !important;
 }

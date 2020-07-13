@@ -12,1062 +12,417 @@
         color: #ff4c42
     }
 
-    #arrows-success-step-2 {
-        overflow-y: hidden;
+    .table-responsive th {
+        min-width: 180px;
+    }
+
+    .table-responsive th:nth-child(2) {
+        min-width: 250px;
+    }
+
+    .table-responsive {
+        height: 200px;
     }
 </style>
+@if(validContent.length!=0)
+<div class="mb-5">
 
-
-<div class="row mb-3" id="handsOnTableCont">
-    <div class="col-12">
-        <div class="scrollHotContainer" style="height:auto;overflow-x:hidden;">
-            <div id="example"></div>
-        </div>
-        <button class="btn btn-primary float-right" id="step2Submit">Submit</button>
+    <div class="card-header">
+        <h5 class="card-title">Valid Members</h5>
     </div>
-    <div id="text-error"></div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    @each(colHeader in tableHeaders)
+                    <th>{{colHeader}}</th>
+                    @endeach
+                </tr>
+            </thead>
+            <tbody>
+                @each(rowBody in validContent)
+                <tr>
+                    @each(colBody in rowBody)
+                    <td>{{colBody}}</td>
+                    @endeach
+                </tr>
+                @endeach
+            </tbody>
+        </table>
+
+    </div>
 </div>
+@endif
+@if(invalidContent.length!=0)
+<div class="mb-5">
+
+    <div class="card-header">
+        <h5 class="card-title">Invalid Members</h5>
+    </div>
+    <div id="datatables-hot"></div>
+</div>
+@endif
 
 <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 {{ script('assets/js/hot-functions') }}
 <script>
-    $(document).ready(function() {
+    $(function() {
+        var tableHeaders = {{{ toJSON(tableHeaders) }}},
+        invalidContent = {{{ toJSON(invalidContent) }}},
+        invalidDetails = {{{ toJSON(invalidDetails) }}},
+        webReqId={{{ webReqId }}},
+        policies={{{ toJSON(policies) }}},
+        contact ={{{ toJSON(contact) }}}
+        const policiesLength=policies.length
         
-        var contact={{{ toJSON(contact) }}},
-        nationalities={{{ toJSON(nationalities) }}},
-        emirates={{{ toJSON(emirates) }}},
-        memberTypes={{{ toJSON(memberTypes) }}},
-        entityTypes={{{ toJSON(entityTypes) }}},
-        establishmentIds={{{ toJSON(establishmentIds) }}},
-        residentialLocations={{{ toJSON(residentialLocations) }}},
-        workLocations={{{ toJSON(workLocations) }}},
-        employeesSalaryBrackets={{{ toJSON(employeesSalaryBrackets) }}},
-        residentialLocations={{{ toJSON(residentialLocations) }}},
-        master={{{ toJSON(master) }}},
-        cor={{{ toJSON(cor) }}},
-        policies={{{ toJSON(policies) }}}
-
-        var relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null
-        var errorMsg=[]
-        //Validations done: dropdown, notEmpty, email, minimum length 2, if filled min length
-        var min2ifNotEmpty = function (value, callback) {
-            var min2=minLengthfunction(value,2)
-            var lettersAndSpaces=lettersAndSpacesfunction(value)
-            if (String(value).length != 0) {
-                if(min2.validation==true && lettersAndSpaces.validation==true){
-                    callback(true)
-                    $("#text-error").text("")
-                }else{
-                    callback(false)
-                    $("#text-error").text("The selected data field "+min2.message+lettersAndSpaces.message)
-                }
-            }else{
-                callback(true);
-                $("#text-error").text("")
-            }
-        };
-        var notEmpty = function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            if(notEmpty.validation==true){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                callback(false)
-                $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-            }
-        };
-        var validEmailIfPrinciple = function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validEmail=validEmailfunction(value)
-            if(relationValue=="1= PRINCIPAL"){
-                if(notEmpty.validation==true && validEmail.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
-                }
-            }else{
-                if(validEmail.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+validEmail.message+"</p>")
-                }
-            }
-        }
-        var namesValidation = function(value,callback){
-            var notEmpty=notEmptyfunction(value)
-            var min2=minLengthfunction(value,2)
-            var lettersAndSpaces=lettersAndSpacesfunction(value)
-            if(notEmpty.validation==true && min2.validation==true && lettersAndSpaces.validation==true){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                callback(false)
-                $("#text-error").html("<p>The selected data field "+notEmpty.message+min2.message+lettersAndSpaces.message+"</p>")
-            }
-        }
-        var alphaNumericIfNotEmptyValidation = function(value,callback){
-            var alphaNumeric=alphaNumericfunction(value)
-            if (String(value).length != 0) {
-                if(alphaNumeric.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+alphaNumeric.message+"</p>")
-                }
-            }else{
-                callback(true);
-                $("#text-error").html("")
-            }
-        }
-        var phoneNumberIfPrinciple = function (value, callback) {
-            var checkPhoneNumber=checkPhoneNumberfunction(value)
-            var notEmpty=notEmptyfunction(value)
-            if(relationValue=="1= PRINCIPAL"){
-                if(notEmpty.validation==true){
-                    if(checkPhoneNumber.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                }
-            }else{
-                    if(checkPhoneNumber.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                    }
-            }
-        }
-        var employeeStaffId= function (value,callback){
-            var min2=minLengthfunction(value,2)
-            var notEmpty=notEmptyfunction(value)
-            if(notEmpty.validation==true){
-                if(min2.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+min2.message+"</p>")
-                }
-            }else{
-                if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                }else{
-                    callback(true)
-                    $("#text-error").html("")
-                }
-            }
-        }
-        var positionField= function (value,callback){
-            var min3=minLengthfunction(value, 3)
-            var notEmpty=notEmptyfunction(value)
-            if(notEmpty.validation==true){
-                if(min3.validation==true){
-                    callback(true)
-                    $("#text-error").text("")
-                }else{
-                    callback(false)
-                    $("#text-error").text("The selected data field " + min3.message)
-                }
-            }else{
-                if(relationValue=="1= PRINCIPAL" && nationalityValue=="Kingdom Of Saudi Arabia"){
-                    callback(false)
-                    $("#text-error").text("The selected data field " + notEmpty.message)
-                }else{
-                    callback(true)
-                    $("#text-error").text("")
-                }
-            }
-        }
-        var acceptableDate=function(value,callback){
-            const timestampFromValue=Date.parse(value);
-            const currentTimestamp=Date.now()
-            const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
-            
-            var validateDate=validateDatefunction(timestampFromValue)
-            if(validateDate.validation==true){
-                if(ageFromtimestamps>99 || ageFromtimestamps<0){
-                    callback(false)
-                    $("#text-error").html("Age should be from 0 to 99")
-                }else{
-                    if(relationValue=="3= CHILD" && ageFromtimestamps>25){
-                        callback(false)
-                        $("#text-error").html("Only children under 25 are dependant")
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-            }else{
-                callback(false)
-                $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
-            }
-        }
-        var emiratesIdNumber=function(value,callback){
-            var validIdNum=validIdNumFunction(value,18,3)
-            if(validIdNum.validation==true){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                callback(false)
-                $("#text-error").html("The selected data field "+validIdNum.message)
-            }
-        }
-        var distinctNumbers=function(value,callback){
-            var distinctNumber=distinctNumberFunction(value)
-            if(distinctNumber.validation==true){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                callback(false)
-                $("#text-error").html("The selected data field "+distinctNumber.message)
-            }
-        }
-        var uidNumbers=function(value,callback){
-            var uidNumber=uidNumberFunction(value,6,15)
-            if(uidNumber.validation==true){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                callback(false)
-                $("#text-error").html("The selected data field "+uidNumber.message)
-            }
-        }
-        var gdrfaFileNumber=function(value,callback){
-            var validIdNum=validIdNumFunction(value,16,3)
-            var notEmpty=notEmptyfunction(value)
-            if(nationalityValue!="United Arab Emirates"){
-
-                if(validIdNum.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("The selected data field "+validIdNum.message)
-                }
-            }else{
-                if(notEmpty.validation==true){
-                    callback(false)
-                    $("#text-error").html("You Should keep this field empty if you are emirati")
-                }else{
-                    callback(true)
-                    $("#text-error").html("")
-                }
-            }
-
-        }
-        var memberTypesValidation=function(value,callback){
-            const timestampFromValue=Date.parse(ageValue);
-            const currentTimestamp=Date.now()
-            const agePerDays=Math.floor((currentTimestamp-timestampFromValue) / (24 * 60 * 60 * 1000));
-            var notEmpty=notEmptyfunction(value)
-            if(notEmpty.validation==true){
-                if(agePerDays<=31){
-                    if(value=="Newborn - Birth Certificate ID"){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("It is mandatory to choose 'Newborn - Birth Certificate ID' for children under 1 month")
-                    }
-                }else{
-                    if(nationalityValue=="United Arab Emirates"){
-                        if(value=="UAE National – Emirates ID"){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").text("It is mandatory to choose 'UAE National – Emirates ID' for Emiratis")
-                        }
-                    }else if(nationalityValue=="Oman" || nationalityValue=="Bahrain" || nationalityValue=="Kuwait" || nationalityValue=="Qatar" || nationalityValue=="Kingdom Of Saudi Arabia"){
-                        if(value=="GCC National - Passport"){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").text("It is mandatory to choose 'GCC National - Passport' if you are from "+nationalityValue)
-                        }
-                    }else{
-                        if(uaeVisaIssuanceValue=="Ajman"){
-                            if(value=="Expat who's residency is issued in Dubai - File Number"){
-                                callback(true)
-                                $("#text-error").html("")
-                            }else{
-                                callback(false)
-                                $("#text-error").text("It is mandatory to choose 'Expat who's residency is issued in Dubai - File Number'")
-                            }
-                        }else{
-                            if(value=="Expat who's residency is issued in Emirates other than Dubai - File Number"){
-                                callback(true)
-                                $("#text-error").html("")
-                            }else{
-                                callback(false)
-                                $("#text-error").text("It is mandatory to choose 'Expat who's residency is issued in Emirates other than Dubai - File Number'")
-                            }
-                        }
-                    }
-                }
-            }else{
-                callback(false)
-                $("#text-error").text("The selected data field " + notEmpty.message)
-            }
-        }
-        var entityTypesValidation=function(value,callback){
-            var notEmpty=notEmptyfunction(value)
-            if(nationalityValue=="United Arab Emirates"){
-                if(notEmpty.validation==false){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field should be empty for emiratis")
-                }
-            }else{
-                if(notEmpty.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                }
-            }
-        }
-        var estIdValidation=function(value,callback){
-            var notEmpty=notEmptyfunction(value)
-            if(memberTypeValue=="UAE National – Emirates ID" || memberTypeValue=="GCC National - Passport"){
-                if(notEmpty.validation==false){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field should be empty")
-                }
-            }else{
-                if(notEmpty.validation==true){
-                    if(value==gdrfaValue){
-                        callback(false)
-                        $("#text-error").html("This field should not be equal to the GDRFAFileNUmber value")
-                    }else{
-                        if(entityTypeValue=="Resident" || entityTypeValue=="Investor Visa"){
-                            var validIdNum=validIdNumFunction(value,13,3)
-                            if(validIdNum.validation==true){
-                                callback(true)
-                                $("#text-error").html("")
-                            }else{
-                                callback(false)
-                                $("#text-error").html("The selected data field "+validIdNum.message)
-                            }
-
-                        }else if(entityTypeValue=="UAE Citizen" || entityTypeValue=="GCC Citizen"){
-                            var uidNumber=uidNumberFunction(value,6,15)
-                            if(uidNumber.validation==true){
-                                callback(true)
-                                $("#text-error").html("")
-                            }else{
-                                callback(false)
-                                $("#text-error").html("The selected data field "+uidNumber.message)
-                            }
-                        }else{
-                            var uidNumber=uidNumberFunction(value,9,11)
-                            if(uidNumber.validation==true){
-                                callback(true)
-                                $("#text-error").html("")
-                            }else{
-                                callback(false)
-                                $("#text-error").html("The selected data field "+uidNumber.message)
-                            }
-                        }
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("The selected data field "+notEmpty.message)
-                }
-            }
-        }
-        var UAEnumFormat=function(value,callback){
-            var UAEnumFormat=UAEnumFormatfunction(value)
-                    if(UAEnumFormat.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+UAEnumFormat.message+"</p>")
-                    }
-        }
-        var validEmailAndMandatory = function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validEmail=validEmailfunction(value)
-                if(notEmpty.validation==true && validEmail.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
-                }
-        }
-        var nationalIdValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validIdNum=validIdNumFunction(value,10,3)
-                if(notEmpty.validation==true){
-                    if(validIdNum.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("The selected data field "+validIdNum.message)
-                    }
-                }else{
-                    if(nationalityValue=="Jordan"){
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-        }
-        var saudiIdValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validIdNum=validIdNumFunction(value,10,3)
-                if(notEmpty.validation==true){
-                    if(validIdNum.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("The selected data field "+validIdNum.message)
-                    }
-                }else{
-                    if(nationalityValue=="Kingdom Of Saudi Arabia"){
-                        callback(false)
-                        $("#text-error").html("The selected data field "+notEmpty.message)
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-        }
-        var iqamaIdValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validIdNum=validIdNumFunction(value,10,3)
-                if(notEmpty.validation==true){
-                    if(validIdNum.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("The selected data field "+validIdNum.message)
-                    }
-                }else{
-                    if(nationalityValue!="Kingdom Of Saudi Arabia"){
-                        callback(false)
-                        $("#text-error").html("The selected data field "+notEmpty.message)
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-        }
-        var iqamaDateValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            const timestampFromValue=Date.parse(value);
-            var validateDate=validateDatefunction(timestampFromValue)
-                if(notEmpty.validation==true){
-                    if(validateDate.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
-                    }
-                }else{
-                    if(nationalityValue=="Kingdom Of Saudi Arabia"){
-                        callback(false)
-                        $("#text-error").html("The selected data field "+notEmpty.message)
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-
-        }
-        var kIdValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validIdNum=validIdNumFunction(value,12,3)
-                if(notEmpty.validation==true){
-                    if(validIdNum.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("The selected data field "+validIdNum.message)
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("The selected data field "+notEmpty.message)
-                }
-        }
-        var qIdValidation= function (value, callback) {
-            var notEmpty=notEmptyfunction(value)
-            var validIdNum=validIdNumFunction(value,11,3)
-                if(notEmpty.validation==true){
-                    if(validIdNum.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("The selected data field "+validIdNum.message)
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("The selected data field "+notEmpty.message)
-                }
-        }
-        var statusValidation= function(value, callback){
-            if(value!="2= MARRIED" && relationValue=="2= SPOUSE"){
-                callback(false)
-                $("#text-error").html("Spouse can only be married")
-            }else if(value!="1= SINGLE" && relationValue=="3= CHILD"){
-                callback(false)
-                $("#text-error").html("Child can only be single")
-            }else{
-                callback(true)
-                $("#text-error").html("")
-            }
-        }
-        cor = cor.toUpperCase()
-            var invalidCount
-        var colHeaderFromCOR=[
-            "Company Name",
-            "Shop or Site or Department",
-            "Employee Staff ID",
-            "First Name",
-            "Second Name",
-            "Family Name",
-            "Relation",
-            "DOB",
-            "Gender",
-            "Nationality",
-            "Marital Status",
-            "Cost Sharing",
-            "Position",
-            "Grade",
-            "Mobile No",
-            "E-mail"];
-        var columnsFromCOR=[
-            {data: "Company Name", type: 'autocomplete', source: ["example1","example2","example3","example4","example5"] ,allowInvalid: true},
-            {data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true},
-            {data: "Employee Staff ID", type: "text", validator:employeeStaffId ,allowInvalid: true},
-            {data: "First Name", type: "text", validator:namesValidation ,allowInvalid: true},
-            {data: "Second Name", type: "text", validator:min2ifNotEmpty ,allowInvalid: true},
-            {data: "Family Name", type: "text", validator:namesValidation ,allowInvalid: true},
-            {data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"]},
-            {data: "DOB", type: "date",dateFormat:'MM/DD/YYYY', correctFormat: true, validator:acceptableDate ,allowInvalid: true},
-            {data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"] ,allowInvalid: true},
-            {data: "Nationality", type: 'dropdown', source: nationalities ,allowInvalid: true},
-            {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:statusValidation ,allowInvalid: true},
-            {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true},
-            {data: "Position", type: "text", validator:positionField ,allowInvalid: true},
-            {data: "Grade", type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true},
-            {data: "Mobile No", type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true},
-            {data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true},
-        
-        ]
-        if(cor=='DUBAI' || cor=='DUBAI LSB'){
-            colHeaderFromCOR.push(
-                "EMIRATES ID NO.",
-                "PASSPORT NO.",
-                "UID",
-                "GDRFAFileNumber",
-                "EMIRATE OF VISA ISSUANCE",
-                "MEMBER TYPE",
-                "ENTITY TYPE",
-                "ESTABLISHMENT ID#",
-                "RESIDENTIAL LOCATION",
-                "WORK LOCATION",
-                "EMPLOYEES SALARY BRACKET",
-                "COMMISSION",
-                "ENTITY CONTACT NUMBER",
-                "ENTITY E-MAIL ID")
-
-            columnsFromCOR.push(
-                {data: "EMIRATES ID NO.", type: "text", validator:emiratesIdNumber ,allowInvalid: true},
-                {data: "PASSPORT NO.", type: "text", validator:distinctNumbers ,allowInvalid: true},
-                {data: "UID", type: "text", validator:uidNumbers ,allowInvalid: true},
-                {data: "GDRFAFileNumber", type: "text", validator:gdrfaFileNumber ,allowInvalid: true},
-                {data: "EMIRATE OF VISA ISSUANCE", type: 'dropdown', source:emirates, validator:notEmpty ,allowInvalid: true},
-                {data: "MEMBER TYPE", type: 'dropdown', source: memberTypes, validator:memberTypesValidation ,allowInvalid: true},
-                {data: "ENTITY TYPE", type: 'dropdown', source: entityTypes, validator:entityTypesValidation ,allowInvalid: true},
-                {data: "ESTABLISHMENT ID#", type: 'text', validator:estIdValidation ,allowInvalid: true},
-                {data: "RESIDENTIAL LOCATION", type: 'dropdown', source: residentialLocations, validator:notEmpty ,allowInvalid: true},
-                {data: "WORK LOCATION", type: 'dropdown', source: workLocations, validator:notEmpty ,allowInvalid: true},
-                {data: "EMPLOYEES SALARY BRACKET", type: 'dropdown', source: employeesSalaryBrackets, validator:notEmpty ,allowInvalid: true},
-                {data: "COMMISSION", type: 'dropdown', source: ["example1","example2","example3","example4","example5"], validator:notEmpty ,allowInvalid: true},
-                {data: "ENTITY CONTACT NUMBER", type: "text", validator:UAEnumFormat ,allowInvalid: true},
-                {data: "ENTITY E-MAIL ID", type: "text", validator:validEmailAndMandatory ,allowInvalid: true})
-
-        }else if(cor=='AUH'){
-            colHeaderFromCOR.push(
-                "EMIRATES ID NO.",
-                "PASSPORT NO.",
-                "UID",
-                "Has the member been previously insured?")
-            columnsFromCOR.push(
-                {data: "EMIRATES ID NO.", type: "text", validator:emiratesIdNumber ,allowInvalid: true},
-                {data: "PASSPORT NO.", type: "text", validator:distinctNumbers ,allowInvalid: true},
-                {data: "UID", type: "text", validator:uidNumbers ,allowInvalid: true},
-                {data: "Has the member been previously insured?", type: 'dropdown', source: ["Yes","No"]})
-        }else if(cor=='OTHER EMIRATES'){
-            colHeaderFromCOR.push(
-                "EMIRATES ID NO.",
-                "PASSPORT NO.",
-                "UID")
-            columnsFromCOR.push(
-                {data: "EMIRATES ID NO.", type: "text", validator:emiratesIdNumber ,allowInvalid: true},
-                {data: "PASSPORT NO.", type: "text", validator:distinctNumbers ,allowInvalid: true},
-                {data: "UID", type: "text", validator:uidNumbers ,allowInvalid: true},
-            )
-        }else if(cor=='JORDAN'){
-            colHeaderFromCOR.push("NATIONAL ID")
-            columnsFromCOR.push(
-                {data: "NATIONAL ID", type: "text", validator:nationalIdValidation ,allowInvalid: true})
-        }else if(cor=='KSA'){
-            colHeaderFromCOR.push(
-                "SAUDI ID",
-                "IQAMA NO.",
-                "IQAMA EXPIRY DATE",
-                "SPONSOR ID")
-            columnsFromCOR.push(
-                {data: "SAUDI ID", type: "text", validator:saudiIdValidation ,allowInvalid: true},
-                {data: "IQAMA NO.", type: "text", validator:iqamaIdValidation ,allowInvalid: true},
-                {data: "IQAMA EXPIRY DATE", type: "date", validator:iqamaDateValidation ,allowInvalid: true},
-                {data: "SPONSOR ID", type: "text", validator:iqamaIdValidation ,allowInvalid: true})
-        }else if(cor=='KUWAIT'){
-            colHeaderFromCOR.push("KUWAIT (KID)")
-            columnsFromCOR.push({data: "KUWAIT (KID)", type: "text", validator:kIdValidation ,allowInvalid: true})
-        }else if(cor=='QATAR'){
-            colHeaderFromCOR.push("QATAR (QID)")
-            columnsFromCOR.push({data: "QATAR (QID)", type: "text", validator:qIdValidation ,allowInvalid: true})
-        }
-        $.each( policies, function( index, value ) {
-            colHeaderFromCOR.push(value)
-            columnsFromCOR.push({data: value, type: 'autocomplete', source: ["category 1","category 2","category 3","category 4","category 5"] ,allowInvalid: true})
-        });
-
-
-        var container = document.getElementById('example');
-        var lastChange = null;
-        var hot = new Handsontable(container, {
-            data: [[]],
-            colHeaders: colHeaderFromCOR,
-            columns: columnsFromCOR,
-            minSpareRows: 1,
+    setTimeout(function(){
+        var hot = new Handsontable(document.getElementById('datatables-hot'), {
+            data: invalidContent,
+            colHeaders: tableHeaders,
+            minSpareRows: 0,
             rowHeaders: false,
             columnSorting: true,
             manualRowMove: true,
             width: "100%",
             height: 200,
-            colWidths: 200,
+            colWidths: 250,
             manualColumnResize: true,
-            afterGetColHeader: function(index, TH) {
-                switch (TH.textContent) {
-                    case "Company Name":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Shop or Site or Department":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Employee Staff ID":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "First Name":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Second Name":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Family Name":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Relation":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "DOB":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Gender":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Nationality":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Marital Status":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Cost Sharing":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Position":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Grade":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Mobile No":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "E-mail":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "EMIRATES ID NO.":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "PASSPORT NO.":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "UID":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "Has the member been previously insured?":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "NATIONAL ID":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "SAUDI ID":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "IQAMA NO.":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "IQAMA EXPIRY DATE":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "SPONSOR ID":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "KUWAIT (KID)":
-                        validationTooltip = "This field is mandatory";
-                        break;
-                    case  "QATAR (QID)":
-                    validationTooltip = "This field is mandatory";
+            afterValidate: function(isValid, value, row, prop, source){
+                if(source=="validateCells"){
+                    validationArray.push(row)
+                    allDataArray.push({row:row,cells:{isValid:isValid,prop:prop, value:value}})
                 }
-                TH.children[0].title = validationTooltip;
-            },
+            }
         });
         hot.updateSettings({
             afterChange: function (change, source) {
-            invalidCount=0
-            var tableData = hot.getData();
-            var tableRow = tableData.length-1;
-            relationValue=hot.getDataAtCell(change[0][0],6)
-            nationalityValue=hot.getDataAtCell(change[0][0],9)
-            ageValue=hot.getDataAtCell(change[0][0],7)
-            gdrfaValue=hot.getDataAtCell(change[0][0],19)
-            uaeVisaIssuanceValue=hot.getDataAtCell(change[0][0],20)
-            memberTypeValue=hot.getDataAtCell(change[0][0],21)
-            entityTypeValue=hot.getDataAtCell(change[0][0],22)
-            if(change[0][1]=="Relation"){
-                if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
-                    hot.setCellMeta(change[0][0],12, 'readOnly', true)
-                    hot.setCellMeta(change[0][0],13, 'readOnly', true)
-                    hot.setCellMeta(change[0][0],12, 'className', "htDisabled")
-                    hot.setCellMeta(change[0][0],13, 'className', "htDisabled")
-                    hot.setDataAtCell(change[0][0],12,"");
-                    hot.setDataAtCell(change[0][0],13,"");
-                }else if(relationValue=="1= PRINCIPAL"){
-                    hot.setCellMeta(change[0][0],12, 'readOnly', false)
-                    hot.setCellMeta(change[0][0],13, 'readOnly', false)
-                    hot.setCellMeta(change[0][0],12, 'className', "")
-                    hot.setCellMeta(change[0][0],13, 'className', "")
-                    hot.setDataAtCell(change[0][0],12,"");
-                    hot.setDataAtCell(change[0][0],13,"");
-                }
-            }
-            for(var rowIndex=0; rowIndex <tableRow; ++rowIndex){
-                var rowData = tableData[rowIndex];
-                var totColumns=rowData.length;
-                for(var columnIndex=0; columnIndex < totColumns;++columnIndex){
-                    var cellProperties = hot.getCellMeta(rowIndex, columnIndex);
-                    if(!cellProperties.valid){
-                        invalidCount++;
-                        //var oldClassName=hot.getCell(rowIndex,columnIndex).className
-                        //hot.getCell(rowIndex,columnIndex).className=oldClassName+" htInvalid"
-                    }
-                }
-            }
-            }
-            })
-
-        Handsontable.dom.addEvent(document.getElementById('step2Submit'), 'click', function() {
+                validationArray=[]
+                //invalidCount=0
                 var tableData = hot.getData();
-                var dataArray={master:master,cor:cor,data:[]};
-                //if(invalidCount==0){
-                    if(cor=='DUBAI' || cor=='DUBAI LSB'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    emirates_id: updatedData[16],
-                                    passport_num: updatedData[17],
-                                    uid: updatedData[18],
-                                    gdrfa_file_number: updatedData[19],
-                                    emirate_of_visa_issuance: updatedData[20],
-                                    member_type: updatedData[21],
-                                    entity_type: updatedData[22],
-                                    establishment_id: updatedData[23],
-                                    residential_location: updatedData[24],
-                                    work_location: updatedData[25],
-                                    employees_salary_bracket: updatedData[26],
-                                    commission: updatedData[27],
-                                    entity_contact_number: updatedData[28],
-                                    entity_email_id: updatedData[29],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='AUH'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    emirates_id: updatedData[16],
-                                    passport_num: updatedData[17],
-                                    uid: updatedData[18],
-                                    previously_insured: updatedData[19],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='OTHER EMIRATES'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    emirates_id: updatedData[16],
-                                    passport_num: updatedData[17],
-                                    uid: updatedData[18],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='JORDAN'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    national_id: updatedData[16],
-                                    contact: contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='KSA'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    saudi_id: updatedData[16],
-                                    iqama_id: updatedData[17],
-                                    iqama_expire_at: updatedData[18],
-                                    sponsor_id: updatedData[19],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='KUWAIT'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    kuwait_id : updatedData[16],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else if(cor=='QATAR'){
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    qatar_id: updatedData[16],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }else{
-                        tableData.forEach(function(updatedData){
-                            if(updatedData[0]!=null){
-                                dataArray.data.push({
-                                    company_name: updatedData[0],
-                                    s_department: updatedData[1],
-                                    employee_staff_id: updatedData[2],
-                                    first_name: updatedData[3],
-                                    second_name: updatedData[4],
-                                    last_name: updatedData[5],
-                                    relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
-                                    gender: updatedData[8],
-                                    nationality: updatedData[9],
-                                    marital_status: updatedData[10],
-                                    cost_sharing: updatedData[11],
-                                    position: updatedData[12],
-                                    grade: updatedData[13],
-                                    mobile: updatedData[14],
-                                    email: updatedData[15],
-                                    contact:contact,
-                                    master: master
-                                })
-                            }
-                        })
-                    }
-                    $.ajax({
-                        url: "{{ route('saveMember') }}",
-                        type: "post",
-                        data:  {data:dataArray},
-                        success: function (res) {
-                            $.get("{{ route('addAMemberStep3') }}", function( data ) {
-                                $("#arrows-success-step-3").html( data );
-                            });
-                            $.get("{{ route('addAMemberStep4') }}", function( data ) {
-                                $("#arrows-success-step-4").html( data );
-                            });
-                            $("#handsOnTableCont").hide();
-                            $("#arrows-success-step-3").show();
-                            $("#arrows-success-step-4").show();
-                        },
-                        error: function(xhr, status, error) {
-                            alert('Something went wrong')
-                            console.log(xhr.responseText);
-                        }
-                    });
-                //}
+                var tableRow = tableData.length-1;
+            }
+        })
+        invalidDetails.forEach((rowDetails,rowIndex) => {
+            rowDetails.forEach(cellProp => {
+                if(cellProp.isValid=="false"){
+                    hot.setCellMeta(rowIndex,cellProp.colIndex, 'valid', false);
+                }
             })
+        })
+        $("#step2Submit").fadeIn();
+    
+    Handsontable.dom.addEvent(document.getElementById('step2Submit'), 'click', async function() {
+        var confirmation=confirm("Are you sure you want to submit the invalid Data?");
+        if(confirmation==true){
+            var addHealthTempId=0;
+            var tableData = hot.getData();
+            var tableHeader = hot.getColHeader();
+            var dataArray={master:master,cor:cor,web_req_id:webReqId,dataDB:[],dataCategories:[]};
+            tableData.forEach(function(updatedData,rowIndex){
+                addHealthTempId++;
+                switch (cor) {
+                    case 'DUBAI':
+                    case 'DUBAI LSB':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            emirates_id: updatedData[16],
+                            passport_num: updatedData[17],
+                            uid: updatedData[18],
+                            gdrfa_file_number: updatedData[19],
+                            emirate_of_visa_issuance: updatedData[20],
+                            member_type: updatedData[21],
+                            entity_type: updatedData[22],
+                            establishment_id: updatedData[23],
+                            residential_location: updatedData[24],
+                            work_location: updatedData[25],
+                            employees_salary_bracket: updatedData[26],
+                            commission: updatedData[27],
+                            entity_contact_number: updatedData[28],
+                            entity_email_id: updatedData[29],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                                        Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'AUH':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            emirates_id: updatedData[16],
+                            passport_num: updatedData[17],
+                            uid: updatedData[18],
+                            previously_insured: updatedData[19],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                                        Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'OTHER EMIRATES':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            emirates_id: updatedData[16],
+                            passport_num: updatedData[17],
+                            uid: updatedData[18],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                                        Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'JORDAN':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            national_id: updatedData[16],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                            Add_health_temp_id:addHealthTempId
+                        })
+                        
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'KSA':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            saudi_id: updatedData[16],
+                            iqama_id: updatedData[17],
+                            iqama_expire_at: updatedData[18],
+                            sponsor_id: updatedData[19],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                            Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'KUWAIT':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            kuwait_id : updatedData[16],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                            Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    case 'QATAR':
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            qatar_id: updatedData[16],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                            Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                    break;
+                    default:
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
+                        dataArray.dataDB.push({
+                            company_name: updatedData[0],
+                            s_department: updatedData[1],
+                            employee_staff_id: updatedData[2],
+                            first_name: updatedData[3],
+                            second_name: updatedData[4],
+                            last_name: updatedData[5],
+                            relation: updatedData[6],
+                            dob: "2020-01-19 03:14:07",
+                            gender: updatedData[8],
+                            nationality: updatedData[9],
+                            marital_status: updatedData[10],
+                            cost_sharing: updatedData[11],
+                            position: updatedData[12],
+                            grade: updatedData[13],
+                            mobile: updatedData[14],
+                            email: updatedData[15],
+                            contact: contact.contact,
+                            master: master,
+                            web_req_id:webReqId,
+                            Add_health_temp_id:addHealthTempId
+                        })
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                        })
+                        dataArray.dataCategories.push(curHeaderArray)
+                }
+            })
+            $.ajax({
+                url: "{{ route('addAMember3') }}",
+                type: "post",
+                data:  {data:dataArray},
+                success: function (res) {
+                    $("#smartwizard-arrows-primary").smartWizard("next");
+                    $(".content-step-3").html(res)
+                },
+                error: function(xhr, status, error) {
+                    alert('Something went wrong')
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+    })
+    }, 1000);
     })
 </script>

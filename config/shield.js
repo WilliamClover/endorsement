@@ -133,7 +133,7 @@ module.exports = {
   csrf: {
     enable: false,
     methods: ["POST", "PUT", "DELETE"],
-    filterUris: ["api/addHealthTempCats/:pid/:wid", "endorsement/saveMember"],
+    filterUris: ["api/addHealthTempCats/:pid/:wid"],
     cookieOptions: {
       httpOnly: false,
       sameSite: true,

@@ -96,6 +96,7 @@ Route.post("admin/unlinkUser/", "Admin/RegisteredListController.unlinkUser")
   .as("unlinkUser");
 
 //Users Pages
+Route.get("endorsement/census", "EndorsementController.census");
 Route.get("endorsement/myPolicies", "EndorsementController.myPolicies");
 Route.get(
   "endorsement/getCORFromMaster",
@@ -104,26 +105,41 @@ Route.get(
 
 Route.get("endorsement/myRequests", "EndorsementController.myRequests");
 Route.get("endorsement/addAMember", "EndorsementController.addAMember");
+Route.post("endorsement/addAMember1", "EndorsementController.addAMember1").as(
+  "addAMember1"
+);
 Route.post("endorsement/addAMember2", "EndorsementController.addAMember2").as(
   "addAMember2"
 );
-Route.get(
-  "endorsement/addAMemberStep3",
-  "EndorsementController.addAMemberStep3"
-).as("addAMemberStep3");
-Route.get(
-  "endorsement/addAMemberStep4",
-  "EndorsementController.addAMemberStep4"
-).as("addAMemberStep4");
-Route.get("endorsement/deletion", "EndorsementController.deletion");
-Route.post("endorsement/saveMember", "EndorsementController.saveMember").as(
-  "saveMember"
+Route.post("endorsement/addAMember3", "EndorsementController.addAMember3").as(
+  "addAMember3"
 );
+Route.post(
+  "endorsement/deleteRejectedPerson",
+  "EndorsementController.deleteRejectedPerson"
+).as("deleteRejectedPerson");
+Route.post(
+  "endorsement/resubmitRejectedPerson",
+  "EndorsementController.resubmitRejectedPerson"
+).as("resubmitRejectedPerson");
+Route.post(
+  "endorsement/saveResubmittedMember",
+  "EndorsementController.saveResubmittedMember"
+).as("saveResubmittedMember");
+
+Route.get(
+  "endorsement/showResubmitRejectedPerson",
+  "EndorsementController.showResubmitRejectedPerson"
+).as("showResubmitRejectedPerson");
+
+Route.get("endorsement/deleteAMember", "EndorsementController.deleteAMember");
+
+Route.get("endorsement/deletion", "EndorsementController.deletion");
 Route.post("endorsement/addCategory", "EndorsementController.addCategory").as(
   "addCategory"
 );
-Route.post("endorsement/step4Upload", "EndorsementController.step4Upload").as(
-  "step4Upload"
+Route.post("endorsement/step3Upload", "EndorsementController.step3Upload").as(
+  "step3Upload"
 );
 
 // APIs start

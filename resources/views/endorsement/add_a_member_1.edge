@@ -20,17 +20,41 @@
         </div>
     </div>
 </div>
-<div class="row mb-3" style="background:#f1f1f1;padding:10px 30px;">
+<div class="row mb-5">
     <div class="col-12">
-        <div class="d-flex align-items-stretch bd-highlight">
-            @each(policy in policies)
+        <div class="d-flex align-items-stretch bd-highlight" style="background:#f1f1f1;">
             <div class="p-2 flex-fill bd-highlight">
-                <h5 class="card-title mb-1">{{policy}}</h5>
-                &nbsp;&nbsp;&nbsp;&nbsp; ├── .babelrc<br />
-                &nbsp;&nbsp;&nbsp;&nbsp; ├── .babelrc<br />
-                &nbsp;&nbsp;&nbsp;&nbsp; └── .babelrc
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Policy Id</th>
+                            <th scope="col">Clover Entity</th>
+                            <th scope="col">LOB</th>
+                            <th scope="col">Supplier</th>
+                            <th scope="col">COR</th>
+                            <th scope="col">Policyholder</th>
+                            <th scope="col">Currency</th>
+                            <th scope="col">Eff date</th>
+                            <th scope="col">Exp Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(policy in policies)
+                        <tr>
+                            <td>{{policy.policyid}}</td>
+                            <td>{{policy.pc}}</td>
+                            <td>{{policy.lob}}</td>
+                            <td>{{policy.supplier}}</td>
+                            <td>{{policy.country}}</td>
+                            <td>{{policy.ph}}</td>
+                            <td>{{policy.currency}}</td>
+                            <td class="dateFormat">{{policy.effective}}</td>
+                            <td class="dateFormat">{{policy.expiry}}</td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
             </div>
-            @endeach
         </div>
     </div>
 </div>
@@ -42,11 +66,34 @@
     </div>
 
 </div>
+<!-- Modal -->
+<div class="modal fade" id="proceedConfirmation" tabindex="-1" role="dialog" aria-labelledby="proceedConfirmationLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="proceedConfirmationLabel">Before proceeding to STEP 3, it is recomended to
+                    fix the invalid entries</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">FixThem</button>
+                <button type="button" class="btn btn-primary" id="proceedToStep2">Proceed to Step 2</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 {{ script('assets/js/hot-functions') }}
 <script>
     $(document).ready(function() {
+        $(".dateFormat").each(function () {
+            var dateNewFormat = moment($(this).text()).format("DD MMMM YYYY");
+            $(this).text(dateNewFormat);
+        });
         var contact={{{ toJSON(contact) }}},
         nationalities={{{ toJSON(nationalities) }}},
         emirates={{{ toJSON(emirates) }}},
@@ -62,8 +109,8 @@
         webReqId={{{ webReqId }}},
         policies={{{ toJSON(policies) }}}
         
-        var relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
-        var errorMsg=[]
+        var categoriesValidator=false, relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
+        var errorMsg=[],categoriesFilled=[]
         //Validations done: dropdown, notEmpty, email, minimum length 2, if filled min length
         var min2ifNotEmpty = function (value, callback) {
             if(emptyRow){
@@ -97,14 +144,14 @@
                 $("#text-error").html("")
             }else{
                 if(value){
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                }
+                    var notEmpty=notEmptyfunction(value)
+                    if(notEmpty.validation==true){
+                        callback(true)
+                        $("#text-error").html("")
+                    }else{
+                        callback(false)
+                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
+                    }
                 }else{
                     callback(false)
                     $("#text-error").html("This field is mandatory")
@@ -817,6 +864,20 @@
                 }
             }
         }
+        var categoriesValidation= function(value, callback){
+            if(emptyRow || value){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(categoriesValidator==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("You should enter at least 1 category")
+                }
+            }
+        }
         cor = cor.toUpperCase()
         //var invalidCount
         var colHeaderFromCOR=[
@@ -932,8 +993,8 @@
             columnsFromCOR.push({data: "QATAR (QID)", type: "text", validator:qIdValidation ,allowInvalid: true})
         }
         $.each( policies, function( index, value ) {
-            colHeaderFromCOR.push(value)
-            columnsFromCOR.push({data: value, type: 'autocomplete', source: ["category 1","category 2","category 3","category 4","category 5"] ,allowInvalid: true})
+            colHeaderFromCOR.push(value.policyid)
+            columnsFromCOR.push({data: value.policyid,className:'categories', type: 'autocomplete', source: ["category 1","category 2","category 3","category 4","category 5"], validator:categoriesValidation ,allowInvalid: true})
         });
         const policiesLength=policies.length
         var allDataArray=[]
@@ -944,16 +1005,15 @@
             data: [[]],
             colHeaders: colHeaderFromCOR,
             columns: columnsFromCOR,
-            minSpareRows: 4,
+            minSpareRows: 6,
             rowHeaders: false,
             columnSorting: true,
             manualRowMove: true,
             width: "100%",
-            height: 200,
+            height: 300,
             colWidths: 250,
             manualColumnResize: true,
             afterGetColHeader: function(index, TH) {
-
                 switch (TH.textContent) {
                     case "Company Name":
                         validationTooltip = "This field is mandatory";
@@ -1039,7 +1099,6 @@
                 TH.children[0].title = validationTooltip;
             },
             afterValidate: function(isValid, value, row, prop, source){
-                //console.log(isValid, value, row, prop, source)
                 if(source=="validateCells"){
                     allDataArray.push({row:row,cells:{isValid:isValid,prop:prop, value:value,colIndex:hot.propToCol(prop)}})
                 }
@@ -1064,6 +1123,17 @@
                 uaeVisaIssuanceValue=hot.getDataAtCell(change[0][0],20)
                 memberTypeValue=hot.getDataAtCell(change[0][0],21)
                 entityTypeValue=hot.getDataAtCell(change[0][0],22)
+                var currentRowIndex=change[0][0]
+                var currentColIndex=hot.propToCol(change[0][1])
+                var currentCellClassName=hot.getCell(currentRowIndex,currentColIndex).className
+                var currentCellValue=hot.getDataAtCell(currentRowIndex,currentColIndex)
+                if(currentCellClassName.includes("categories")){
+                    if(currentCellValue!=null && currentCellValue!=""){
+                        categoriesFilled.push({currentRowIndex,currentColIndex})
+                    }else{
+                        categoriesFilled = categoriesFilled.filter(obj => obj.currentRowIndex != currentRowIndex || obj.currentColIndex != currentColIndex)
+                    }
+                }
                 if(change[0][1]=="Relation"){
                     if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
                         hot.setCellMeta(change[0][0],12, 'readOnly', true)
@@ -1085,7 +1155,16 @@
             }
         })
         hot.addHook('beforeValidate', function(val, row, prop) {
-                emptyRow=hot.isEmptyRow(row)
+            emptyRow=hot.isEmptyRow(row)
+            var currentColIndex=hot.propToCol(prop)
+            var currentCellValue=hot.getDataAtCell(row,currentColIndex)
+            categoriesValidator=false
+                categoriesFilled.forEach(item => {
+                    if(item.currentRowIndex==row){
+                        categoriesValidator=true
+                    }
+                })
+            
         });
         Handsontable.dom.addEvent(document.getElementById('step1Submit'), 'click', async function() {
             var newArray = [];
@@ -1108,7 +1187,42 @@
                         oldRow=item.row
                     }
                 });
-                let allFilledRows = newArray.slice(4).reverse()
+                let allFilledRows = newArray.slice(6).reverse()
+                allFilledRows.forEach((filledRow,index) => {
+                    var p=filledRow.map((valid) =>  valid.isValid).indexOf(false);
+                    if(p<0){
+                        validEntries.push(filledRow)
+                        validRowsIndexes.push(index)
+                    }else{
+                        invalidEntries.push(filledRow)
+                    }
+                })
+            })
+                        $('#proceedConfirmation').modal()
+        })
+        Handsontable.dom.addEvent(document.getElementById('proceedToStep2'), 'click', async function() {
+                $('#proceedConfirmation').modal('hide')
+            var newArray = [];
+            var oldRow=0
+            allDataArray.length=0
+            let validEntries=[]
+            let invalidEntries=[]
+            let validRowsIndexes=[]
+            
+            hot.validateCells(function(hotIsValid) {
+                allDataArray.forEach(item => {
+                    var newItem = [];
+                    allDataArray.forEach(innerItem => {
+                        if(innerItem.row == item.row){
+                            newItem = newItem.concat(innerItem.cells);
+                        }
+                    });
+                    if(oldRow!=item.row){
+                        newArray.push(newItem);
+                        oldRow=item.row
+                    }
+                });
+                let allFilledRows = newArray.slice(6).reverse()
                 allFilledRows.forEach((filledRow,index) => {
                     var p=filledRow.map((valid) =>  valid.isValid).indexOf(false);
                     if(p<0){

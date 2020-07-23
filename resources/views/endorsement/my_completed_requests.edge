@@ -1,0 +1,125 @@
+@layout('layout.app')
+@section('content')
+<h1 class="h3 mb-3">My Completed Requests</h1>
+<div class="row">
+    <div class="col-12 col-lg-4">
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="card-title">Additions</h5>
+            </div>
+            <div class="accordion" id="myCompletedAddRequests">
+                @each(policy in policiesFromAdd)
+                <div class="card mb-1">
+                    <div class="card-header" data-toggle="collapse" data-target="#myCompletedAddRequests_{{policy.id}}"
+                        aria-expanded="true" aria-controls="myCompletedAddRequests_{{policy.id}}">
+                        <h5 class="card-title mb-0" data-toggle="tooltip" data-placement="bottom" data-html="true"
+                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.country}}</li><li>PH: {{policy.ph}}</li></ul>">
+                            {{policy.policyid}}</h5>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+                    </div>
+                    <div id="myCompletedAddRequests_{{policy.id}}" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#myCompletedAddRequests">
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table">
+                                    <tbody>
+                                        @each(endorsement in endorsIdFromAddDb)
+                                        @if(endorsement.policy_id== $parent.policy.policyid)
+                                        <tr>
+                                            <td>Endorsement Id: <a
+                                                    href="javascript:openAddDetails({{endorsement.web_req_id}},{{endorsement.Add_health_temp_id}},{{endorsement.endorsement_id}})">
+                                                    {{endorsement.endorsement_id}}</a></td>
+                                        </tr>
+                                        @endif
+                                        @endeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endeach
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="card-title">Deletions</h5>
+            </div>
+            <div class="accordion" id="myCompletedDelRequests">
+                @each(policy in policiesFromDelete)
+                <div class="card mb-1">
+                    <div class="card-header" data-toggle="collapse" data-target="#myCompletedDelRequests_{{policy.id}}"
+                        aria-expanded="true" aria-controls="myCompletedDelRequests_{{policy.id}}">
+                        <h5 class="card-title mb-0" data-toggle="tooltip" data-placement="bottom" data-html="true"
+                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.country}}</li><li>PH: {{policy.ph}}</li></ul>">
+                            {{policy.policyid}}</h5>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+                    </div>
+                    <div id="myCompletedDelRequests_{{policy.id}}" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#myCompletedDelRequests">
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table">
+                                    <tbody>
+                                        @each(endorsement in endorsIdFromDeleteDb)
+                                        @if(endorsement.policy_id== $parent.policy.policyid)
+                                        <tr>
+                                            <td>Endorsement Id: <a
+                                                    href="javascript:openDelDetails({{endorsement.census_id}},{{endorsement.endorsement_id}})">
+                                                    {{endorsement.endorsement_id}}</a></td>
+                                        </tr>
+                                        @endif
+                                        @endeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endeach
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-body" id="requestsDetails"></div>
+        </div>
+    </div>
+</div>
+
+@endsection
+@section('javascript')
+<script>
+    $(function(){
+    
+})
+function openAddDetails(web_req_id,Add_health_temp_id,endorsement_id){
+    $.post("{{ route('myCompletedRequestsDetails') }}",
+    {
+        section: "add",
+        web_req_id: web_req_id,
+        Add_health_temp_id: Add_health_temp_id,
+        endorsement_id:endorsement_id
+    },
+    function(data, status){
+        $("#requestsDetails").html(data)
+    });
+}
+function openDelDetails(census_id,endorsement_id){
+    $.post("{{ route('myCompletedRequestsDetails') }}",
+    {
+        section: "delete",
+        census_id: census_id,
+        endorsement_id:endorsement_id
+    },
+    function(data, status){
+        $("#requestsDetails").html(data)
+    });
+}
+</script>
+
+@endsection

@@ -22,11 +22,11 @@
                             <tr>
                                 <th scope="col">Policy Id</th>
                                 <th scope="col">Clover Entity</th>
-                                <th scope="col">Policy Number</th>
+                                <!--<th scope="col">Policy Number</th>-->
                                 <th scope="col">LOB</th>
                                 <th scope="col">Supplier</th>
                                 <th scope="col">COR</th>
-                                <th scope="col">Subcat</th>
+                                <!--<th scope="col">Subcat</th>-->
                                 <th scope="col">Policyholder</th>
                                 <th scope="col">Currency</th>
                                 <th scope="col">Eff date</th>
@@ -39,15 +39,15 @@
                             <tr>
                                 <th scope="row">{{policy.policyid}}</th>
                                 <td>{{policy.pc}}</td>
-                                <td>{{policy.policy}}</td>
+                                <!--<td>{{policy.policy}}</td>-->
                                 <td>{{policy.lob}}</td>
                                 <td>{{policy.supplier}}</td>
                                 <td>{{policy.country}}</td>
-                                <td>{{policy.subcat}}</td>
+                                <!--<td>{{policy.subcat}}</td>-->
                                 <td>{{policy.ph}}</td>
                                 <td>{{policy.currency}}</td>
-                                <td>{{policy.effective}}</td>
-                                <td>{{policy.expiry}}</td>
+                                <td class="dateFormat">{{policy.effective}}</td>
+                                <td class="dateFormat">{{policy.expiry}}</td>
                             </tr>
                             @endif
                             @endeach
@@ -64,4 +64,12 @@
 
 
 @section('javascript')
+<script>
+    $(function() {
+    $(".dateFormat").each(function () {
+        var dateNewFormat = moment($(this).text()).format("DD MMMM YYYY");
+        $(this).text(dateNewFormat);
+    });
+})
+</script>
 @endsection

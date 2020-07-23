@@ -8,6 +8,8 @@
     .handsontable thead th.ht__active_highlight {
         background-color: #696969;
         color: #fff;
+        text-align: center;
+        vertical-align: middle !important;
     }
 
     #text-error {
@@ -16,6 +18,20 @@
 
     #step-2 {
         overflow-y: hidden;
+    }
+
+    .step-content {
+        border-top: 20px solid #f5f9fc !important;
+    }
+
+    #step1Submit,
+    #step2Submit {
+        width: 150px !important
+    }
+
+    #smartwizard-arrows-primary .nav-tabs li a {
+        width: 155px;
+        height: 68px;
     }
 </style>
 @endsection
@@ -28,7 +44,7 @@
         <div id="smartwizard-arrows-primary" class="wizard wizard-primary mb-4">
             <ul>
                 <li>
-                    <a href="#arrows-primary-step-1">Step 1<br /><small>Member to Delete</small></a>
+                    <a href="#arrows-primary-step-1">Step 1<br /><small>Select member(s)</small></a>
                 </li>
                 <li>
                     <a href="#arrows-primary-step-2">Step 2<br /><small>Validate</small></a>
@@ -37,12 +53,11 @@
                     <a href="#arrows-primary-step-3">Step 3<br /><small>Upload Documents</small></a>
                 </li>
             </ul>
-
             <div>
                 <div id="arrows-primary-step-1" class="">
                     <div class="messagesContainer"></div>
 
-                    <div class="row mb-3">
+                    <div class="row mb-3 p-3">
                         <div class="col-6" id="MASTERcontainer">
                             <select class="selectMaster js-states form-control">
                                 <option></option>
@@ -58,26 +73,28 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-3">
+                    <div class="row mb-3 p-3">
                         <div class="col-12" id="step-2">
                         </div>
                     </div>
-                    <hr class="my-3">
-                    <div class="d-flex">
-                        <div id="text-error"></div>
-                        <button class="btn btn-primary ml-auto" id="step2Submit">Next</button>
+                    <div class="btnInSmartwizard">
+                        <div class="d-flex">
+                            <div id="text-error"></div>
+                            <button class="btn btn-primary ml-auto" id="step1Submit">Next</button>
+                        </div>
                     </div>
                 </div>
                 <div id="arrows-primary-step-2" class="">
-                    <div class="content-step-2"></div>
-                    <hr class="my-3">
-                    <div class="d-flex">
-                        <div id="text-error"></div>
-                        <button class="btn btn-primary ml-auto" id="step2Submit">Next</button>
+                    <div class="content-step-2 p-3"></div>
+                    <div class="btnInSmartwizard">
+                        <div class="d-flex">
+                            <div id="text-error"></div>
+                            <button class="btn btn-primary ml-auto" id="step2Submit">Next</button>
+                        </div>
                     </div>
                 </div>
                 <div id="arrows-primary-step-3" class="">
-                    Step Content 3
+                    <div class="content-step-3 p-3"></div>
                 </div>
             </div>
         </div>
@@ -89,11 +106,65 @@
 {{ script('assets/js/hot-functions') }}
 <script>
     $(document).ready(function() {
-        $("#step2Submit").hide();
-        $("#next-btn").on("click", function() {
-            // Navigate next
-            $('#smartwizard-arrows-primary').smartWizard("next");
-            return true;
+        //$("#step2Submit").hide();
+            var dataArray=[]
+        $("#step1Submit").on("click", function() {
+            $("tr.selected").each(function () {
+                var entryId = $(this).attr("id").slice(10);
+                dataArray.push(entryId)
+            });
+            if(dataArray.length==0){
+                    alert("You didn't select any entry")
+            }else{
+                $.ajax({
+                    url: "{{ route('tableTodelete') }}",
+                    type: "post",
+                    data:  {cor:cor,step:2,data:dataArray},
+                    success: function (res) {
+                        $(".content-step-2").html(res)
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+                $("#smartwizard-arrows-primary").smartWizard("next");
+            }
+        });
+        $("#step2Submit").on("click", function() {
+            var step2Data=[]
+            var valError=0
+            $("#datatables_step2 tr.selected").each(function () {
+                var entryId = $(this).attr("id");
+                if($(this).find(".reason textarea").css("display")!="none"){
+                    if($(this).find(".reason").children("textarea").val()!=""){
+                        var reason = $(this).find(".reason").children("textarea").val();
+                    }else{
+                        valError=1
+                    }
+                }else{
+                    var reason = null
+                }
+                step2Data.push({id:entryId,reason:reason})
+            });
+            if(valError==0){
+                $.ajax({
+                    url: "{{ route('deleteMemberFromDb') }}",
+                    type: "post",
+                    data:  {cor:cor,step:2,data:step2Data},
+                    success: function (res) {
+                        $(".content-step-3").html(res)
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+                $("#smartwizard-arrows-primary").smartWizard("next");
+            }else{
+                alert("Please add a reason to the selected dependent(s)")
+            }
+            
         });
         $("#smartwizard-arrows-primary").smartWizard({
             selected:0,
@@ -111,31 +182,21 @@
         $("#smartwizard-arrows-primary").on("showStep", function(e, anchorObject, index, stepDirection, stepPosition) {
             const stepIndex=index+1
             if(stepIndex==2){
+            }else if(stepIndex==3){
                 // $.ajax({
-                //     url: "{{ route('addAMember2') }}",
-                //     type: "post",
+                //     url: "{{ route('addAMember3') }}",
+                //     type: "get",
                 //     success: function (res) {
-                //         $(".content-step-2").html(res)
+                //         $("#arrows-primary-step-3").html(res)
                 //     },
                 //     error: function(xhr, status, error) {
                 //         alert('Something went wrong')
                 //         console.log(xhr.responseText);
                 //     }
                 // });
-            }else if(stepIndex==3){
-                $.ajax({
-                    url: "{{ route('addAMember3') }}",
-                    type: "get",
-                    success: function (res) {
-                        $("#arrows-primary-step-3").html(res)
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Something went wrong')
-                        console.log(xhr.responseText);
-                    }
-                });
             }
         });
+
         $(".selectMaster").val('').change();
         $(".selectMaster").select2({
             placeholder: "Select MASTER Account"
@@ -168,7 +229,20 @@
             cor =$(this).val();
                 $("#MASTERcontainer").html("<strong>MASTER Account:</strong> "+master+"</strong>")
                 $("#CORcontainer").html("<strong>Country of Residence:</strong> "+cor+"</strong>")
-                $("#step-2").html("here goes the delete a member table")
+                
+                $.ajax({
+                    url: "{{ route('tableTodelete') }}",
+                    type: "post",
+                    data:  {cor:cor,step:1,data:[]},
+                    success: function (res) {
+                        $("#step-2").html(res)
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+                
         })
     })
 </script>

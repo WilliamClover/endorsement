@@ -1,0 +1,88 @@
+<div class="row">
+    <div class="col-12" style="overflow:auto;">
+        <table class="table table-bordered w-100" id="datatables_step2">
+            <thead>
+                <tr>
+                    <th>Relation</th>
+                    <th>Full Name</th>
+                    <th>Policy</th>
+                    <th>Category</th>
+                    <th>Company Name</th>
+                    <td></td>
+                    <th style="width:250px">Reason to delete</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @each(memberFromCensus in allMembersFromCensus)
+                @if(memberFromCensus.id==memberFromCensus.principal_id)
+                <tr class="principal" data-principal="{{memberFromCensus.id}}" id="{{memberFromCensus.id}}">
+                    @else
+                <tr class="dependent_{{memberFromCensus.principal_id}}"
+                    data-principal="{{memberFromCensus.principal_id}}" id="{{memberFromCensus.id}}">
+                    @endif
+                    <td class="relation">{{memberFromCensus.relation}}</td>
+                    <td class="full_name">{{memberFromCensus.first_name}} {{memberFromCensus.last_name}}</td>
+                    <td class="policy">{{memberFromCensus.policy}}</td>
+                    <td class="category">{{memberFromCensus.category}}</td>
+                    <td class="company_name">{{memberFromCensus.company_name}}</td>
+                    <td></td>
+                    <td class="reason">&nbsp;
+                        <textarea name="delete_reason_{{censusEntry.id}}" id="delete_reason_{{censusEntry.id}}"
+                            style="display:none;"></textarea>
+                    </td>
+                </tr>
+                @endeach
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(function() {
+		$("#datatables_step2").DataTable({
+            columnDefs: [ {
+                className: 'select-checkbox',
+                targets:5
+            }, {
+                width: '250px',
+                targets:6
+            }],
+            select: {
+                style: "multi",
+                selector: 'td:nth-child(6)'
+            },
+            "autoWidth": false,
+            "ordering": false
+        })
+        $("#datatables_step2").DataTable().rows().select()
+        $("#datatables_step2").DataTable().on( 'user-select', function ( e, dt, type, cell, originalEvent ) {
+            var row = dt.row( cell.index().row ).node();
+            var principalId=$(row).data("principal");
+            var countAllDependent=$(row).siblings(".dependent_"+principalId).length;
+            var countCheckedDependent=$(row).siblings(".selected.dependent_"+principalId).length;
+            var countUncheckedDependent=$(row).siblings(".dependent_"+principalId+":not(.selected)").length;
+            if ($(row).hasClass("principal")) {
+                if ($(row).hasClass("selected")){
+                    $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeIn()
+                }else{
+                    if(countUncheckedDependent==0) $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeOut()
+                }
+            }
+            else {
+                if ($(row).hasClass("selected")) {
+                    $(row).find("textarea").fadeOut()
+                    $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeIn()
+                }else{
+                    if(countAllDependent==countCheckedDependent){
+                        $(row).parent().children(".dependent_"+principalId).find("textarea").fadeOut()
+                    }else{
+                        $(row).find("textarea").fadeIn()
+                    }
+                    if($("#"+principalId).hasClass("selected")==false){
+                        $("#"+principalId).addClass("selected")
+                    }
+                };
+            }
+        });
+    })
+</script>

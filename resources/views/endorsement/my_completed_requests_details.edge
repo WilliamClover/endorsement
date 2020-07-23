@@ -1,0 +1,25 @@
+<h5>Endorsement: {{endorsement_id}}</h5>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Company name</th>
+            <th>Full Name</th>
+            <th>Relation</th>
+            <th>Email</th>
+            <th>Nationality</th>
+            <th>Gender</th>
+        </tr>
+    </thead>
+    <tbody>
+        @each(completedRequest in completedRequests)
+        <tr>
+            <td>{{completedRequest.company_name}}</td>
+            <td>{{completedRequest.first_name}} {{completedRequest.last_name}}</td>
+            <td>{{completedRequest.relation}}</td>
+            <td>{{completedRequest.email}}</td>
+            <td>{{completedRequest.nationality}}</td>
+            <td>{{completedRequest.gender}}</td>
+        </tr>
+        @endeach
+    </tbody>
+</table>

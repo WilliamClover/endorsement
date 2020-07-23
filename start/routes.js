@@ -95,25 +95,10 @@ Route.post("admin/unlinkUser/", "Admin/RegisteredListController.unlinkUser")
   .middleware(["userIsAdmin"])
   .as("unlinkUser");
 
-//Users Pages
-Route.get("endorsement/census", "EndorsementController.census");
 Route.get("endorsement/myPolicies", "EndorsementController.myPolicies");
-Route.get(
-  "endorsement/getCORFromMaster",
-  "EndorsementController.getCORFromMaster"
-).as("getCORFromMaster");
 
 Route.get("endorsement/myRequests", "EndorsementController.myRequests");
-Route.get("endorsement/addAMember", "EndorsementController.addAMember");
-Route.post("endorsement/addAMember1", "EndorsementController.addAMember1").as(
-  "addAMember1"
-);
-Route.post("endorsement/addAMember2", "EndorsementController.addAMember2").as(
-  "addAMember2"
-);
-Route.post("endorsement/addAMember3", "EndorsementController.addAMember3").as(
-  "addAMember3"
-);
+
 Route.post(
   "endorsement/deleteRejectedPerson",
   "EndorsementController.deleteRejectedPerson"
@@ -132,14 +117,61 @@ Route.get(
   "EndorsementController.showResubmitRejectedPerson"
 ).as("showResubmitRejectedPerson");
 
+/////////////start/////////////CENSUS/////////////start/////////////
+Route.get("endorsement/census", "EndorsementController.census");
+Route.post("endorsement/censusList", "EndorsementController.censusList").as(
+  "censusList"
+);
+/////////////end/////////////CENSUS/////////////end/////////////
+
+/////////////start/////////////ADD A MEMBER/////////////start/////////////
+Route.get(
+  "endorsement/getCORFromMaster",
+  "EndorsementController.getCORFromMaster"
+).as("getCORFromMaster");
+Route.get("endorsement/addAMember", "EndorsementController.addAMember");
+Route.post("endorsement/addAMember1", "EndorsementController.addAMember1").as(
+  "addAMember1"
+);
+Route.post("endorsement/addAMember2", "EndorsementController.addAMember2").as(
+  "addAMember2"
+);
+Route.post("endorsement/addAMember3", "EndorsementController.addAMember3").as(
+  "addAMember3"
+);
+Route.post("endorsement/step3Upload", "EndorsementController.step3Upload").as(
+  "step3Upload"
+);
+/////////////end/////////////ADD A MEMBER/////////////end/////////////
+
+/////////////start/////////////DELETE A MEMBER/////////////start/////////////
 Route.get("endorsement/deleteAMember", "EndorsementController.deleteAMember");
+Route.post(
+  "endorsement/tableTodelete",
+  "EndorsementController.tableTodelete"
+).as("tableTodelete");
+Route.post(
+  "endorsement/deleteMemberFromDb",
+  "EndorsementController.deleteMemberFromDb"
+).as("deleteMemberFromDb");
+Route.post(
+  "endorsement/deleteAMember3Upload",
+  "EndorsementController.deleteAMember3Upload"
+).as("deleteAMember3Upload");
+/////////////end/////////////DELETE A MEMBER/////////////end/////////////
+
+Route.get(
+  "endorsement/myCompletedRequests",
+  "EndorsementController.myCompletedRequests"
+);
+Route.post(
+  "endorsement/myCompletedRequestsDetails",
+  "EndorsementController.myCompletedRequestsDetails"
+).as("myCompletedRequestsDetails");
 
 Route.get("endorsement/deletion", "EndorsementController.deletion");
 Route.post("endorsement/addCategory", "EndorsementController.addCategory").as(
   "addCategory"
-);
-Route.post("endorsement/step3Upload", "EndorsementController.step3Upload").as(
-  "step3Upload"
 );
 
 // APIs start

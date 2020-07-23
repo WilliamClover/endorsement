@@ -285,6 +285,7 @@
 	</div>
 	<!--   Core JS Files   -->
 	{{ script('assets/js/app') }}
+	{{ script('assets/js/functions') }}
 
 	@if(flashMessage('alert'))
 	<script>
@@ -297,6 +298,9 @@
 	</script>
 	@endif
 	<script>
+		$(function () {
+			highlightLinksInSideBar()
+		})
 		function showFlashMessages(message,title,type){
            toastr[type](message, title, {
              positionClass: "toast-top-center",
@@ -305,6 +309,22 @@
              newestOnTop: "checked",
              timeOut: "20000",
            });
+		}
+		function highlightLinksInSideBar(){
+			var url = $(location).attr('href');
+			var parts = url.split("/");
+			var last_part_url = parts[parts.length-1];
+			$( "a.sidebar-link" ).each(function() {
+				var link_parts = $( this ).attr("href").split("/");
+				var last_part_link = link_parts[link_parts.length-1];
+				if(last_part_url===last_part_link){
+					$( this ).parent("li.sidebar-item").addClass( "active" );
+					if($( this ).parent("li.sidebar-item").parent("ul.sidebar-dropdown").length!=0){
+						$( this ).parent("li.sidebar-item").parent("ul.sidebar-dropdown").show()
+						$( this ).parent("li.sidebar-item").parent("ul.sidebar-dropdown").parent("li.sidebar-item").addClass( "active" )
+					}
+				}
+			});
 		}
 	</script>
 	@!section('javascript')

@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="col-12" style="overflow:auto;">
+        <table class="table table-bordered" id="datatables-multi">
+            <thead>
+                <tr>
+                    <th width="50">Delete</th>
+                    <th>Full Name</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @each(censusEntry in memberFromCensus)
+                @if(censusEntry.first_name)
+                <tr id="entry_row_{{censusEntry.id}}">
+                    <td></td>
+                    <td class="full_name">{{censusEntry.first_name}} {{censusEntry.last_name}}</td>
+                </tr>
+                @endif
+                @endeach
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(function() {
+			var datatablesMulti = $("#datatables-multi").DataTable({
+                columnDefs: [ {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets:   0
+                } ],
+				select: {
+					style: "multi",
+                    selector: 'td:nth-child(1)'
+				},
+                order: [[ 1, 'asc' ]]
+			});
+
+        // $(".select-checkbox").click(function(){
+        //     const entryRow=$(this).parent("tr")
+        //     if (entryRow.hasClass("selected")) {
+        //         $(this).siblings("td").children("textarea").fadeOut().val('');
+        //     }else{
+        //         $(this).siblings("td").children("textarea").fadeIn()
+        //     };
+        // })
+    })
+</script>

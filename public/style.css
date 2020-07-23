@@ -6,11 +6,13 @@ body {
   width: 100%;
 }
 
-body {
+/* body {
   font-family: "Montserrat", sans-serif;
   font-weight: 300;
+} */
+.timeline {
+  padding-left: 30px;
 }
-
 * {
   margin: 0;
   padding: 0;
@@ -145,15 +147,86 @@ body {
 .iti--separate-dial-code {
   width: 100%;
 }
-.handsontable tbody th,
-.handsontable thead th,
-.handsontable tbody th.ht__highlight,
 .handsontable thead th.ht__highlight,
-.handsontable tbody th.ht__active_highlight,
 .handsontable thead th.ht__active_highlight {
-  background-color: #fff !important;
   color: #000 !important;
 }
 .handsontable span.colHeader {
   font-weight: bold !important;
 }
+.wizard .step-content#arrows-primary-step-2 {
+  padding: 1.25rem 0 !important;
+}
+
+.handsontable thead th,
+.handsontable thead th.ht__active_highlight {
+  background-color: #696969;
+  color: #fff;
+}
+
+.handsontable tbody th,
+.handsontable tbody th.ht__active_highlight {
+  background-color: #fff !important;
+}
+
+#text-error {
+  color: #ff4c42;
+}
+
+.content-step-2 .table-responsive th:nth-child(1),
+.content-step-2 .table-responsive td:nth-child(1),
+.content-step-2 .handsontable thead th:nth-child(1),
+.content-step-2 .handsontable thead td:nth-child(1) {
+  min-width: 50px;
+}
+
+.table-responsive th,
+.table-responsive td,
+.handsontable th,
+.handsontable td {
+  min-width: 250px;
+  padding: 0;
+  vertical-align: middle !important;
+  text-align: center;
+  height: 30px !important;
+}
+table.dataTable > tbody > tr.child {
+  text-align: left;
+}
+.content-step-2 .table-responsive {
+  height: 200px;
+}
+
+.btnInSmartwizard {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: -50px;
+}
+table.dataTable tbody td.select-checkbox:after,
+table.dataTable tbody td.select-checkbox:before,
+table.dataTable tbody th.select-checkbox:after,
+table.dataTable tbody th.select-checkbox:before {
+  top: 50%;
+}
+table.dataTable tbody > tr.selected,
+table.dataTable tbody > tr > .selected {
+  background-color: #999;
+}
+table.dataTable.dtr-inline.collapsed
+  > tbody
+  > tr[role="row"]
+  > td:first-child::before,
+table.dataTable.dtr-inline.collapsed
+  > tbody
+  > tr[role="row"]
+  > th:first-child::before {
+  background-color: #a20000;
+}
+/* table.dataTable > tbody > tr.child ul.dtr-details {
+  width: 100%;
+}
+table.dataTable > tbody > tr.child ul.dtr-details li {
+  width: 30%;
+  display: inline-block;
+} */

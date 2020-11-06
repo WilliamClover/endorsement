@@ -1,0 +1,33 @@
+@each(policy in policiesFromAdd)
+<div class="card mb-1">
+    <div class="card-header" data-toggle="collapse" data-target="#myOngoingRequests_{{policy.id}}" aria-expanded="true"
+        aria-controls="myOngoingRequests_{{policy.id}}">
+        <h5 class="card-title mb-0" data-toggle="tooltip" data-placement="bottom" data-html="true"
+            title="<ul class='mx-3 text-left'><li>Master: {{policy.master_account}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.cor}}</li><li>Policyholder: {{policy.policyholder}}</li></ul>">
+            <strong>Policy Id:</strong> {{policy.master_policy_clover_id}}</h5>
+        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+    </div>
+    <div id="myOngoingRequests_{{policy.id}}" class="collapse" aria-labelledby="headingOne"
+        data-parent="#myOngoingRequests">
+        <div class="row">
+            <div class="col-12">
+                <table class="table">
+                    <tbody>
+                        @each(endorsement in endorsIdFromAddDb)
+                        @if(endorsement.policy_id== $parent.policy.master_policy_clover_id)
+                        <tr>
+                            <td>Endorsement Id: <a href="javascript:openDetails({{endorsement.endorsement_id}})">
+                                    {{endorsement.endorsement_id}}</a></td>
+                            <td class="dateFormat">{{endorsement.date}}</td>
+                        </tr>
+                        @endif
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endeach

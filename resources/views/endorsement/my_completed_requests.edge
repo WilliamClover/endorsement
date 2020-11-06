@@ -13,8 +13,8 @@
                     <div class="card-header" data-toggle="collapse" data-target="#myCompletedAddRequests_{{policy.id}}"
                         aria-expanded="true" aria-controls="myCompletedAddRequests_{{policy.id}}">
                         <h5 class="card-title mb-0" data-toggle="tooltip" data-placement="bottom" data-html="true"
-                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.country}}</li><li>PH: {{policy.ph}}</li></ul>">
-                            {{policy.policyid}}</h5>
+                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master_account}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.cor}}</li><li>Policyholder: {{policy.policyholder}}</li></ul>">
+                            {{policy.master_policy_clover_id}}</h5>
                         <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
                         <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
 
@@ -26,11 +26,12 @@
                                 <table class="table">
                                     <tbody>
                                         @each(endorsement in endorsIdFromAddDb)
-                                        @if(endorsement.policy_id== $parent.policy.policyid)
+                                        @if(endorsement.policy_id== $parent.policy.master_policy_clover_id)
                                         <tr>
                                             <td>Endorsement Id: <a
-                                                    href="javascript:openAddDetails({{endorsement.web_req_id}},{{endorsement.Add_health_temp_id}},{{endorsement.endorsement_id}})">
+                                                    href="javascript:openDetails({{endorsement.endorsement_id}})">
                                                     {{endorsement.endorsement_id}}</a></td>
+                                            <td class="dateFormat">{{endorsement.date}}</td>
                                         </tr>
                                         @endif
                                         @endeach
@@ -53,8 +54,8 @@
                     <div class="card-header" data-toggle="collapse" data-target="#myCompletedDelRequests_{{policy.id}}"
                         aria-expanded="true" aria-controls="myCompletedDelRequests_{{policy.id}}">
                         <h5 class="card-title mb-0" data-toggle="tooltip" data-placement="bottom" data-html="true"
-                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.country}}</li><li>PH: {{policy.ph}}</li></ul>">
-                            {{policy.policyid}}</h5>
+                            title="<ul class='mx-3 text-left'><li>Master: {{policy.master_account}}</li><li>LOB: {{policy.lob}}</li><li>Supplier: {{policy.supplier}}</li><li>Currency: {{policy.currency}}</li><li>Country: {{policy.cor}}</li><li>Policyholder: {{policy.policyholder}}</li></ul>">
+                            {{policy.master_policy_clover_id}}</h5>
                         <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
                         <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
 
@@ -66,11 +67,12 @@
                                 <table class="table">
                                     <tbody>
                                         @each(endorsement in endorsIdFromDeleteDb)
-                                        @if(endorsement.policy_id== $parent.policy.policyid)
+                                        @if(endorsement.policy_id== $parent.policy.master_policy_clover_id)
                                         <tr>
                                             <td>Endorsement Id: <a
                                                     href="javascript:openDelDetails({{endorsement.census_id}},{{endorsement.endorsement_id}})">
                                                     {{endorsement.endorsement_id}}</a></td>
+                                            <td class="dateFormat">{{endorsement.date_of_request}}</td>
                                         </tr>
                                         @endif
                                         @endeach
@@ -86,7 +88,9 @@
     </div>
     <div class="col-12 col-lg-8">
         <div class="card">
-            <div class="card-body" id="requestsDetails"></div>
+            <div class="card-body" id="requestsDetails">
+                <h6 class="text-center"><em>Member requests details will appear here!</em></h6>
+            </div>
         </div>
     </div>
 </div>
@@ -95,10 +99,13 @@
 @section('javascript')
 <script>
     $(function(){
-    
-})
+        $(".dateFormat").each(function() {
+            var dateNewFormat=moment($(this).text()).format("DD MMM YYYY")
+            $(this).text(dateNewFormat)
+        });
+    })
 function openAddDetails(web_req_id,Add_health_temp_id,endorsement_id){
-    $.post("{{ route('myCompletedRequestsDetails') }}",
+    $.post("{{ route('myRequestsDetails') }}",
     {
         section: "add",
         web_req_id: web_req_id,
@@ -109,12 +116,12 @@ function openAddDetails(web_req_id,Add_health_temp_id,endorsement_id){
         $("#requestsDetails").html(data)
     });
 }
-function openDelDetails(census_id,endorsement_id){
-    $.post("{{ route('myCompletedRequestsDetails') }}",
+function openDetails(endorsement_id){
+    $.post("{{ route('myRequestsDetails') }}",
     {
-        section: "delete",
-        census_id: census_id,
-        endorsement_id:endorsement_id
+        section: "add",
+        endorsement_id:endorsement_id,
+        status:"completed"
     },
     function(data, status){
         $("#requestsDetails").html(data)

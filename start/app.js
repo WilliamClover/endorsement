@@ -21,6 +21,7 @@ const providers = [
   "@adonisjs/auth/providers/AuthProvider",
   "@adonisjs/mail/providers/MailProvider",
   "@adonisjs/validator/providers/ValidatorProvider",
+  "adonis-scheduler/providers/SchedulerProvider",
 ];
 
 /*
@@ -32,7 +33,8 @@ const providers = [
 | Providers for migrations, tests etc.
 |
 */
-const aceProviders = ["@adonisjs/lucid/providers/MigrationsProvider"];
+const aceProviders = ["@adonisjs/lucid/providers/MigrationsProvider",
+  "adonis-scheduler/providers/CommandsProvider",];
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +48,9 @@ const aceProviders = ["@adonisjs/lucid/providers/MigrationsProvider"];
 |   { Route: 'Adonis/Src/Route' }
 |
 */
-const aliases = {};
+const aliases = {
+  Scheduler: "Adonis/Addons/Scheduler",
+};
 
 /*
 |--------------------------------------------------------------------------

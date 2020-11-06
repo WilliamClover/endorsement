@@ -12,8 +12,8 @@
                     <div class="col-6" id="MASTERcontainer">
                         <select class="selectMaster js-states form-control">
                             <option></option>
-                            @each(master in masters)
-                            <option value="{{master.master}}">{{master.master}}</option>
+                            @each(master_account in master_accounts)
+                            <option value="{{master_account.master_account}}">{{master_account.master_account}}</option>
                             @endeach
                         </select>
                     </div>
@@ -45,16 +45,16 @@
             placeholder: "Select MASTER Account"
         });
         $('.selectMaster').on('change', function (e) {
-            master =$(this).val();
+            master_account =$(this).val();
             $(".selectCOR option").remove()
             $.ajax({
                 url: "{{ route('getCORFromMaster') }}",
                 type: "get",
-                data: {master:$(this).val()},
+                data: {master_account:$(this).val()},
                 success: function (res) {
                     $(".selectCOR").append("<option></option>")
                     $.each(res, function( index, value ) {
-                        $(".selectCOR").append("<option value='"+value.country +"'>"+value.country +"</option>")
+                        $(".selectCOR").append("<option value='"+value.cor +"'>"+value.cor +"</option>")
                     });
                 },
                 error: function(xhr, status, error) {
@@ -73,12 +73,12 @@
             $("#step-2").html('<div class="text-center w-100"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>')
             $.post("{{ route('censusList') }}",
             {
-                master: master,
+                master_account: master_account,
                 cor: cor
             },
             function(data, status){
                 $(".card-header").hide()
-                $("#MASTERcontainer").html("<strong>MASTER Account:</strong> "+master+"</strong>")
+                $("#MASTERcontainer").html("<strong>MASTER Account:</strong> "+master_account+"</strong>")
                 $("#CORcontainer").html("<strong>Country of Residence:</strong> "+cor+"</strong>")
                 $("#step-2").html(data)
             });

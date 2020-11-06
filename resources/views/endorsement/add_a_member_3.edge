@@ -1,21 +1,29 @@
 <div class="row">
-    <div class="col-12 p-3" style="height:300px;overflow:auto;border-bottom:20px solid #f5f9fc !important">
-        <h4 class="text-center">Please submit needed documentations for the following persons:</h4>
+    <div class="col-12 p-3" style="border-bottom:20px solid #f5f9fc !important">
+        <h4 class="text-center pb-3">Please submit needed documentations for the following persons:</h4>
 
         <table class="table table-striped table-bordered mx-auto w-auto">
             <thead>
                 <tr>
-                    <th width="350">Full Name</th>
-                    <th width="350">Company Name</th>
+                    <th>Company Name</th>
+                    <th>Full Name</th>
+                    <th>DOB</th>
                 </tr>
             </thead>
             <tbody>
+                @if(submittedEntries.length==0)
+                <tr>
+                    <td colspan="3" class="text-center"><strong>No valid entries</strong></td>
+                </tr>
+                @else
                 @each(submittedEntry in submittedEntries)
                 <tr>
-                    <td>{{submittedEntry.first_name}} {{submittedEntry.last_name}}</td>
                     <td>{{submittedEntry.company_name}}</td>
+                    <td>{{submittedEntry.first_name}} {{submittedEntry.last_name}}</td>
+                    <td>{{submittedEntry.dob}}</td>
                 </tr>
                 @endeach
+                @endif
             </tbody>
         </table>
     </div>
@@ -75,11 +83,16 @@
             <div class="col-12 col-sm-6">
                 <form method="POST" action="{{ route('step3Upload') }}" enctype="multipart/form-data">
                     {{ csrfField() }}
-                    <input type="file" name="profile_pics[]" multiple />
+                    <input type="file" name="profile_pics[]" multiple /><br />
+                    <em class="small">Allowed extensions: 'jpeg', 'jpg', 'bmp', 'gif', 'png', 'pdf', 'tiff', 'tif'</em>
+                    <label class="custom-control custom-checkbox pt-2">
+                        <input type="checkbox" class="custom-control-input" onclick="enableSubmit(this);">
+                        <span class="custom-control-label">I confirm that all the needed documents are uploaded</span>
+                    </label>
                     <div style="position: absolute;width: 100%;left: 0;bottom:0;">
                         <div class="d-flex">
                             <div id="text-error"></div>
-                            <button class="btn btn-primary ml-auto">Submit</button>
+                            <button class="btn btn-primary ml-auto" disabled id="submitForm">Submit</button>
                         </div>
                     </div>
                 </form>
@@ -89,5 +102,7 @@
 </div>
 
 <script>
-
+    function enableSubmit(e){
+        $("#submitForm").prop('disabled', !e.checked);
+    }
 </script>

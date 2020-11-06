@@ -28,11 +28,11 @@
                     <thead>
                         <tr>
                             <th scope="col">Policy Id</th>
-                            <th scope="col">Clover Entity</th>
                             <th scope="col">LOB</th>
                             <th scope="col">Supplier</th>
                             <th scope="col">COR</th>
-                            <th scope="col">Policyholder</th>
+                            <th scope="col">Sub category</th>
+                            <th scope="col">Policy holder</th>
                             <th scope="col">Currency</th>
                             <th scope="col">Eff date</th>
                             <th scope="col">Exp Date</th>
@@ -41,15 +41,15 @@
                     <tbody>
                         @each(policy in policies)
                         <tr>
-                            <td>{{policy.policyid}}</td>
-                            <td>{{policy.pc}}</td>
+                            <td>{{policy.master_policy_clover_id}}</td>
                             <td>{{policy.lob}}</td>
                             <td>{{policy.supplier}}</td>
-                            <td>{{policy.country}}</td>
-                            <td>{{policy.ph}}</td>
+                            <td>{{policy.cor}}</td>
+                            <td>{{policy.subcat}}</td>
+                            <td>{{policy.policyholder}}</td>
                             <td>{{policy.currency}}</td>
-                            <td class="dateFormat">{{policy.effective}}</td>
-                            <td class="dateFormat">{{policy.expiry}}</td>
+                            <td class="dateFormat">{{policy.effective_date}}</td>
+                            <td class="dateFormat">{{policy.expiry_date}}</td>
                         </tr>
                         @endeach
                     </tbody>
@@ -70,15 +70,18 @@
 <div class="modal fade" id="proceedConfirmation" tabindex="-1" role="dialog" aria-labelledby="proceedConfirmationLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="proceedConfirmationLabel">Before proceeding to STEP 3, it is recomended to
+        <div class="modal-content step1Modal">
+            <div class="modal-header justify-content-center">
+                <div class='spinner-border text-primary justify-content-center'><span class='sr-only'>Loading...</span>
+                </div>
+                <h5 class="modal-title d-none" id="proceedConfirmationLabel">Before proceeding to STEP 2, it is
+                    recomended to
                     fix the invalid entries</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer d-none">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">FixThem</button>
                 <button type="button" class="btn btn-primary" id="proceedToStep2">Proceed to Step 2</button>
             </div>
@@ -89,13 +92,20 @@
 <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 {{ script('assets/js/hot-functions') }}
 <script>
+    var categoriesValidator=false, relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
+    
     $(document).ready(function() {
+        
         $(".dateFormat").each(function () {
-            var dateNewFormat = moment($(this).text()).format("DD MMMM YYYY");
+            var dateNewFormat=moment($(this).text(),"MMM DD YYYY hh:mm a").format("DD MMM YYYY")
             $(this).text(dateNewFormat);
         });
         var contact={{{ toJSON(contact) }}},
+        categories={{{ toJSON(categories) }}},
+        catBasedOnLimit={{{ toJSON(catBasedOnLimit) }}},
+        client_contact_id={{{ toJSON(client_contact_id) }}},
         nationalities={{{ toJSON(nationalities) }}},
+        companyName={{{ toJSON(companyName) }}},
         emirates={{{ toJSON(emirates) }}},
         memberTypes={{{ toJSON(memberTypes) }}},
         entityTypes={{{ toJSON(entityTypes) }}},
@@ -104,272 +114,14 @@
         workLocations={{{ toJSON(workLocations) }}},
         employeesSalaryBrackets={{{ toJSON(employeesSalaryBrackets) }}},
         residentialLocations={{{ toJSON(residentialLocations) }}},
-        master={{{ toJSON(master) }}},
+        master_account={{{ toJSON(master_account) }}},
         cor={{{ toJSON(cor) }}},
         webReqId={{{ webReqId }}},
         policies={{{ toJSON(policies) }}}
-        
-        var categoriesValidator=false, relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
         var errorMsg=[],categoriesFilled=[]
+        let validLimits=""
         //Validations done: dropdown, notEmpty, email, minimum length 2, if filled min length
-        var min2ifNotEmpty = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    var min2=minLengthfunction(value,2)
-                    var lettersAndSpaces=lettersAndSpacesfunction(value)
-                    if (String(value).length != 0) {
-                        if(min2.validation==true && lettersAndSpaces.validation==true){
-                            callback(true)
-                            $("#text-error").text("")
-                        }else{
-                            callback(false)
-                            $("#text-error").text("The selected data field "+min2.message+lettersAndSpaces.message)
-                        }
-                    }else{
-                        callback(true);
-                        $("#text-error").text("")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        };
-        var notEmpty = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    var notEmpty=notEmptyfunction(value)
-                    if(notEmpty.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        };
-        var validEmailIfPrinciple = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var notEmpty=notEmptyfunction(value)
-                var validEmail=validEmailfunction(value)
-                if(relationValue=="1= PRINCIPAL"){
-                    if(notEmpty.validation==true && validEmail.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
-                    }
-                }else{
-                    if(validEmail.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+validEmail.message+"</p>")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var namesValidation = function(value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    var notEmpty=notEmptyfunction(value)
-                    var min2=minLengthfunction(value,2)
-                    var lettersAndSpaces=lettersAndSpacesfunction(value)
-                    if(notEmpty.validation==true && min2.validation==true && lettersAndSpaces.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+min2.message+lettersAndSpaces.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var alphaNumericIfNotEmptyValidation = function(value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var alphaNumeric=alphaNumericfunction(value)
-                if (String(value).length != 0) {
-                    if(alphaNumeric.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+alphaNumeric.message+"</p>")
-                    }
-                }else{
-                    callback(true);
-                    $("#text-error").html("")
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var phoneNumberIfPrinciple = function (value, callback) {
-            
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var checkPhoneNumber=checkPhoneNumberfunction(value)
-                var notEmpty=notEmptyfunction(value)
-                if(relationValue=="1= PRINCIPAL"){
-                    if(notEmpty.validation==true){
-                        if(checkPhoneNumber.validation==true){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                        }
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }
-                }else{
-                        if(checkPhoneNumber.validation==true){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                        }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var employeeStaffId= function (value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var min2=minLengthfunction(value,2)
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    if(min2.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+min2.message+"</p>")
-                    }
-                }else{
-                    if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var positionField= function (value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var min3=minLengthfunction(value, 3)
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    if(min3.validation==true){
-                        callback(true)
-                        $("#text-error").text("")
-                    }else{
-                        callback(false)
-                        $("#text-error").text("The selected data field " + min3.message)
-                    }
-                }else{
-                    if(relationValue=="1= PRINCIPAL" && nationalityValue=="Kingdom Of Saudi Arabia"){
-                        callback(false)
-                        $("#text-error").text("The selected data field " + notEmpty.message)
-                    }else{
-                        callback(true)
-                        $("#text-error").text("")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var acceptableDate=function(value,callback){
-            
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    const timestampFromValue=Date.parse(value);
-                    const currentTimestamp=Date.now()
-                    const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
-                    
-                    var validateDate=validateDatefunction(timestampFromValue)
-                    if(validateDate.validation==true){
-                        if(ageFromtimestamps>99 || ageFromtimestamps<0){
-                            callback(false)
-                            $("#text-error").html("Age should be from 0 to 99")
-                        }else{
-                            if(relationValue=="3= CHILD" && ageFromtimestamps>25){
-                                callback(false)
-                                $("#text-error").html("Only children under 25 are dependant")
-                            }else{
-                                callback(true)
-                                $("#text-error").html("")
-                            }
-                        }
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
+        
         var emiratesIdNumber=function(value,callback){
             
             if(emptyRow){
@@ -766,7 +518,7 @@
                 if(value){
                 var notEmpty=notEmptyfunction(value)
                 const timestampFromValue=Date.parse(value);
-                var validateDate=validateDatefunction(timestampFromValue)
+                var validateDate=validDatefunction(timestampFromValue)
                     if(notEmpty.validation==true){
                         if(validateDate.validation==true){
                             callback(true)
@@ -880,7 +632,7 @@
         }
         cor = cor.toUpperCase()
         //var invalidCount
-        var colHeaderFromCOR=[
+        let colHeaderFromCOR=[
             "Company Name",
             "Shop or Site or Department",
             "Employee Staff ID",
@@ -897,23 +649,23 @@
             "Grade",
             "Mobile No",
             "E-mail"];
-        var columnsFromCOR=[
-            {data: "Company Name", type: 'autocomplete', source: ["example1","example2","example3","example4","example5"] ,allowInvalid: true},
-            {data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true},
-            {data: "Employee Staff ID", type: "text", validator:employeeStaffId ,allowInvalid: true},
-            {data: "First Name", type: "text", validator:namesValidation ,allowInvalid: true},
-            {data: "Second Name", type: "text", validator:min2ifNotEmpty ,allowInvalid: true},
-            {data: "Family Name", type: "text", validator:namesValidation ,allowInvalid: true},
-            {data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"]},
-            {data: "DOB", type: "date",dateFormat:'MM/DD/YYYY', correctFormat: true, validator:acceptableDate ,allowInvalid: true},
-            {data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"] ,allowInvalid: true},
-            {data: "Nationality", type: 'dropdown', source: nationalities ,allowInvalid: true},
-            {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:statusValidation ,allowInvalid: true},
-            {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true},
-            {data: "Position", type: "text", validator:positionField ,allowInvalid: true},
-            {data: "Grade", type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true},
-            {data: "Mobile No", type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true},
-            {data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true},
+        let columnsFromCOR=[
+           {data: "Company Name", type: 'dropdown', source: companyName ,allowInvalid: true},
+           {data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true},
+           {data: "Employee Staff ID", type: "text", validator:employeeStaffId ,allowInvalid: true},
+           {data: "First Name", type: "text", validator:namesValidation ,allowInvalid: true},
+           {data: "Second Name", type: "text", validator:min2ifNotEmpty ,allowInvalid: true},
+           {data: "Family Name", type: "text", validator:namesValidation ,allowInvalid: true},
+           {data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"]},
+           {data: "DOB", type: "text",placeholder:'DD/MM/YYYY', validator:acceptableDate ,allowInvalid: true},
+           {data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"] ,allowInvalid: true},
+           {data: "Nationality", type: 'dropdown', source: nationalities ,allowInvalid: true},
+           {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:statusValidation ,allowInvalid: true},
+           {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true},
+           {data: "Position", type: "text", validator:positionField ,allowInvalid: true},
+           {data: "Grade", type: "text", validator:alphaNumericIfNotEmpty ,allowInvalid: true},
+           {data: "Mobile No", type: "text", validator:phoneNumberIfPrincipal ,allowInvalid: true},
+           {data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true},
         
         ]
         if(cor=='DUBAI' || cor=='DUBAI LSB'){
@@ -993,8 +745,16 @@
             columnsFromCOR.push({data: "QATAR (QID)", type: "text", validator:qIdValidation ,allowInvalid: true})
         }
         $.each( policies, function( index, value ) {
-            colHeaderFromCOR.push(value.policyid)
-            columnsFromCOR.push({data: value.policyid,className:'categories', type: 'autocomplete', source: ["category 1","category 2","category 3","category 4","category 5"], validator:categoriesValidation ,allowInvalid: true})
+            colHeaderFromCOR.push("Policy Id #: "+value.master_policy_clover_id)
+            if(value.lob=="GROUP HEALTH"){
+            columnsFromCOR.push({data: value.master_policy_clover_id,className:'categories', type: 'dropdown', source: categories,  validator:categoriesValidation ,allowInvalid: true})
+            }else{
+                $.each( catBasedOnLimit, function( i, cats ) {
+                    if(value.master_policy_clover_id===cats.master_policy_clover_id){
+                        columnsFromCOR.push({data: value.master_policy_clover_id, placeholder:'Limit: from '+ cats.limit_from + ' to '+ cats.limit_to, className:'categories', type: 'text', validator:categoriesValidation ,allowInvalid: true})
+                    }
+                })    
+            }
         });
         const policiesLength=policies.length
         var allDataArray=[]
@@ -1102,19 +862,28 @@
                 if(source=="validateCells"){
                     allDataArray.push({row:row,cells:{isValid:isValid,prop:prop, value:value,colIndex:hot.propToCol(prop)}})
                 }
-            }
+                if (row >= hot.countRows() - hot.getSettings().minSpareRows)
+		            return true;
+                }
         });
-        var exportPlugin = hot.getPlugin('exportFile');
         
-        downloadCsv.addEventListener('click', function() {
-            exportPlugin.downloadFile('csv', {
-            columnHeaders: true,        // default false, exports the column headers
-            filename: 'Add a member in '+cor+' [DD]-[MM]-[YYYY]'
-            });
-        });
-        hot.updateSettings({
-            afterChange: function (change, source) {
-                var tableData = hot.getData();
+        hot.addHook('afterChange', function(change, source) {
+            validLimits=""
+            $.each( catBasedOnLimit, function( i, cats ) {
+            change.forEach(function(e){
+                if(e[1]===cats['master_policy_clover_id']){
+                    const limit_from=cats.limit_from
+                    const limit_to=cats.limit_to
+                    if(e[3]>=limit_from && e[3]>=limit_to){
+                        validLimits = "Policy #: "+ e[1] +" should be between "+ limit_from +" and "+ limit_to
+                    }
+                }
+            })
+                // if(value.master_policy_clover_id===cats.master_policy_clover_id){
+                //     columnsFromCOR.push({data: value.master_policy_clover_id, placeholder:'Limit: from '+ cats.limit_from + ' to '+ cats.limit_to, className:'categories', type: 'text', validator:categoriesValidation ,allowInvalid: true})
+                // }
+            })  
+            var tableData = hot.getData();
                 var tableRow = tableData.length-1;
                 relationValue=hot.getDataAtCell(change[0][0],6)
                 nationalityValue=hot.getDataAtCell(change[0][0],9)
@@ -1123,17 +892,7 @@
                 uaeVisaIssuanceValue=hot.getDataAtCell(change[0][0],20)
                 memberTypeValue=hot.getDataAtCell(change[0][0],21)
                 entityTypeValue=hot.getDataAtCell(change[0][0],22)
-                var currentRowIndex=change[0][0]
-                var currentColIndex=hot.propToCol(change[0][1])
-                var currentCellClassName=hot.getCell(currentRowIndex,currentColIndex).className
-                var currentCellValue=hot.getDataAtCell(currentRowIndex,currentColIndex)
-                if(currentCellClassName.includes("categories")){
-                    if(currentCellValue!=null && currentCellValue!=""){
-                        categoriesFilled.push({currentRowIndex,currentColIndex})
-                    }else{
-                        categoriesFilled = categoriesFilled.filter(obj => obj.currentRowIndex != currentRowIndex || obj.currentColIndex != currentColIndex)
-                    }
-                }
+
                 if(change[0][1]=="Relation"){
                     if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
                         hot.setCellMeta(change[0][0],12, 'readOnly', true)
@@ -1152,8 +911,16 @@
                     }
                 }
                 $("#step1Submit").fadeIn();
-            }
-        })
+        });
+
+        var exportPlugin = hot.getPlugin('exportFile');
+        
+        downloadCsv.addEventListener('click', function() {
+            exportPlugin.downloadFile('csv', {
+            columnHeaders: true,        // default false, exports the column headers
+            filename: 'Add a member in '+cor+' [DD]-[MM]-[YYYY]'
+            });
+        });
         hot.addHook('beforeValidate', function(val, row, prop) {
             emptyRow=hot.isEmptyRow(row)
             var currentColIndex=hot.propToCol(prop)
@@ -1167,6 +934,8 @@
             
         });
         Handsontable.dom.addEvent(document.getElementById('step1Submit'), 'click', async function() {
+            //.step1Modal .spinner-border .modal-content
+            //$(".modal-footer").html("<div class='spinner-border text-primary' role='status'><span class='sr-only'>Loading...</span></div>")
             var newArray = [];
             var oldRow=0
             allDataArray.length=0
@@ -1174,31 +943,37 @@
             let invalidEntries=[]
             let validRowsIndexes=[]
             
-            hot.validateCells(function(hotIsValid) {
-                allDataArray.forEach(item => {
-                    var newItem = [];
-                    allDataArray.forEach(innerItem => {
-                        if(innerItem.row == item.row){
-                            newItem = newItem.concat(innerItem.cells);
+            if(validLimits==""){
+                hot.validateCells(function(hotIsValid) {
+                    allDataArray.forEach(item => {
+                        var newItem = [];
+                        allDataArray.forEach(innerItem => {
+                            if(innerItem.row == item.row){
+                                newItem = newItem.concat(innerItem.cells);
+                            }
+                        });
+                        if(oldRow!=item.row){
+                            newArray.push(newItem);
+                            oldRow=item.row
                         }
                     });
-                    if(oldRow!=item.row){
-                        newArray.push(newItem);
-                        oldRow=item.row
-                    }
-                });
-                let allFilledRows = newArray.slice(6).reverse()
-                allFilledRows.forEach((filledRow,index) => {
-                    var p=filledRow.map((valid) =>  valid.isValid).indexOf(false);
-                    if(p<0){
-                        validEntries.push(filledRow)
-                        validRowsIndexes.push(index)
-                    }else{
-                        invalidEntries.push(filledRow)
-                    }
+                    let allFilledRows = newArray.slice(6).reverse()
+                    allFilledRows.forEach((filledRow,index) => {
+                        var p=filledRow.map((valid) =>  valid.isValid).indexOf(false);
+                        if(p<0){
+                            validEntries.push(filledRow)
+                            validRowsIndexes.push(index)
+                        }else{
+                            invalidEntries.push(filledRow)
+                        }
+                    })
+                    $(".step1Modal .spinner-border").hide().siblings("h5").removeClass("d-none")
+                    $(".step1Modal .modal-footer").removeClass("d-none")
                 })
-            })
-                        $('#proceedConfirmation').modal()
+                $('#proceedConfirmation').modal()
+            }else{
+                alert(validLimits)
+            }
         })
         Handsontable.dom.addEvent(document.getElementById('proceedToStep2'), 'click', async function() {
                 $('#proceedConfirmation').modal('hide')
@@ -1236,17 +1011,24 @@
             setTimeout(function(){
                 var tableData = hot.getData();
                 var tableHeader = hot.getColHeader();
-                var dataArray={master:master,cor:cor,web_req_id:webReqId,validEntries:validEntries,invalidEntries:invalidEntries,dataDB:[],dataCategories:[],validRowsIndexes:validRowsIndexes};
+                var dataArray={master_account:master_account,cor:cor,web_req_id:webReqId,validEntries:validEntries,invalidEntries:invalidEntries,dataDB:[],dataCategories:[],validRowsIndexes:validRowsIndexes};
                 var addHealthTempId=0;
-                validRowsIndexes.forEach(function(validRowIndex){
+                    const arrayCount=tableData.length-6;
                     tableData.forEach(function(updatedData,rowIndex){
-                        if(validRowIndex==rowIndex){
+                        var d = new Date();
+                        var month = d.getMonth()+1;
+                        var day = d.getDate();
+
+                        var outputDate = d.getFullYear() + '/' +
+                            (month<10 ? '0' : '') + month + '/' +
+                            (day<10 ? '0' : '') + day;
+                        if(rowIndex < arrayCount){
                             addHealthTempId++;
+                            var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                            var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                             switch (cor) {
                                 case 'DUBAI':
                                 case 'DUBAI LSB':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1255,7 +1037,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1278,21 +1060,15 @@
                                         commission: updatedData[27],
                                         entity_contact_number: updatedData[28],
                                         entity_email_id: updatedData[29],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'AUH':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1301,7 +1077,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1314,21 +1090,15 @@
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
                                         previously_insured: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'OTHER EMIRATES':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1337,7 +1107,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1349,21 +1119,15 @@
                                         emirates_id: updatedData[16],
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'JORDAN':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1372,7 +1136,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1382,22 +1146,15 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         national_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'KSA':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1406,7 +1163,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1419,21 +1176,15 @@
                                         iqama_id: updatedData[17],
                                         iqama_expire_at: updatedData[18],
                                         sponsor_id: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'KUWAIT':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1442,7 +1193,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1452,21 +1203,15 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         kuwait_id : updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 case 'QATAR':
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1475,7 +1220,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1485,21 +1230,15 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         qatar_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                                 break;
                                 default:
-                                    var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                                    var tableHeaderArray=tableHeader.slice(Math.max(updatedData.length - policiesLength, 0))
                                     dataArray.dataDB.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
@@ -1508,7 +1247,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: updatedData[7],
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1517,25 +1256,25 @@
                                         grade: updatedData[13],
                                         mobile: updatedData[14],
                                         email: updatedData[15],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
+                                        Add_health_temp_id:addHealthTempId,
+                                        date:outputDate
                                     })
-                                    var curHeaderArray=[]
-                                    tableHeaderArray.forEach(function(headerCont,index){
-                                        var category=categoriesArray[index]
-                                        curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                                    })
-                                    dataArray.dataCategories.push(curHeaderArray)
                             }
+                            tableHeaderArray.forEach(function(headerCont,index){
+                                var category=categoriesArray[index]
+                                dataArray.dataCategories.push({policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId})
+                            })
                         }
                     })
-                })
+                const HOTcols=JSON.stringify(columnsFromCOR)
                 $.ajax({
                     url: "{{ route('addAMember2') }}",
                     type: "post",
-                    data:  {data:dataArray},
+                    data:  {data:dataArray,HOTcols:HOTcols},
                     success: function (res) {
                         $("#smartwizard-arrows-primary").smartWizard("next");
                         $(".content-step-2").html(res)

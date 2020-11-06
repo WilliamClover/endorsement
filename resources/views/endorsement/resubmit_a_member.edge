@@ -55,7 +55,7 @@
         var errorMsg=[]
         var objectData = {{{ toJSON(memberToResubmit) }}},
         cor={{{ toJSON(cor) }}},
-        master={{{ toJSON(master) }}},
+        master_account={{{ toJSON(master_account) }}},
         webReqId={{{ toJSON(webReqId) }}},
         contact={{{ toJSON(contact) }}},
         nationalities={{{ toJSON(nationalities) }}},
@@ -170,7 +170,7 @@
                 }
             }
         }
-        var alphaNumericIfNotEmptyValidation = function(value,callback){
+        var alphaNumericIfNotEmpty = function(value,callback){
             if(emptyRow){
                 callback(true)
                 $("#text-error").html("")
@@ -195,14 +195,14 @@
                 }
             }
         }
-        var phoneNumberIfPrinciple = function (value, callback) {
+        var phoneNumberIfPrincipal = function (value, callback) {
             
             if(emptyRow){
                 callback(true)
                 $("#text-error").html("")
             }else{
                 if(value){
-                var checkPhoneNumber=checkPhoneNumberfunction(value)
+                var checkPhoneNumber=validPhoneFunction(value)
                 var notEmpty=notEmptyfunction(value)
                 if(relationValue=="1= PRINCIPAL"){
                     if(notEmpty.validation==true){
@@ -305,7 +305,7 @@
                     const currentTimestamp=Date.now()
                     const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
                     
-                    var validateDate=validateDatefunction(timestampFromValue)
+                    var validateDate=validDatefunction(timestampFromValue)
                     if(validateDate.validation==true){
                         if(ageFromtimestamps>99 || ageFromtimestamps<0){
                             callback(false)
@@ -725,7 +725,7 @@
                 if(value){
                 var notEmpty=notEmptyfunction(value)
                 const timestampFromValue=Date.parse(value);
-                var validateDate=validateDatefunction(timestampFromValue)
+                var validateDate=validDatefunction(timestampFromValue)
                     if(notEmpty.validation==true){
                         if(validateDate.validation==true){
                             callback(true)
@@ -837,8 +837,8 @@
             {data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:statusValidation ,allowInvalid: true},
             {data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true},
             {data: "Position", type: "text", validator:positionField ,allowInvalid: true},
-            {data: "Grade", type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true},
-            {data: "Mobile No", type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true},
+            {data: "Grade", type: "text", validator:alphaNumericIfNotEmpty ,allowInvalid: true},
+            {data: "Mobile No", type: "text", validator:phoneNumberIfPrincipal ,allowInvalid: true},
             {data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true},
         
         ]
@@ -908,7 +908,7 @@
             var addHealthTempId=0;
             var tableData = hot.getSourceData();
             var tableHeader = hot.getColHeader();
-            var dataArray={master:master,cor:cor,web_req_id:webReqId,dataDB:[]};
+            var dataArray={master_account:master_account,cor:cor,web_req_id:webReqId,dataDB:[]};
             tableData.forEach(function(updatedData,rowIndex){
                 addHealthTempId++;
                 dataArray.dataDB.push({
@@ -944,7 +944,6 @@
                     commission:updatedData["COMMISSION"],
                     entity_contact_number:updatedData["ENTITY CONTACT NUMBER"],
                     entity_email_id:updatedData["ENTITY E-MAIL ID"],
-                    contact:updatedData["QATAR (QID)"],
                     emirates_id:updatedData["EMIRATES ID NO."],
                     passport_num:updatedData["PASSPORT NO."],
                     uid:updatedData["UID"],
@@ -955,8 +954,8 @@
                     sponsor_id:updatedData["SPONSOR ID"],
                     kuwait_id:updatedData["KUWAIT (KID)"],
                     qatar_id:updatedData["KUWAIT (KID)"],
-                    contact: contact.contact,
-                    master: master,
+                    client_contact_name: contact.client_contact_name,
+                    master_account: master_account,
                     web_req_id:webReqId,
                     Add_health_temp_id:addHealthTempId
                 })

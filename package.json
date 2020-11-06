@@ -29,13 +29,16 @@
     "@adonisjs/shield": "^1.0.8",
     "@adonisjs/validator": "^5.0.6",
     "@sendgrid/mail": "^7.1.0",
+    "adonis-scheduler": "^3.0.2",
     "adonis-twilio": "^0.1.0",
     "axios": "^0.19.2",
+    "mssql": "^4.1.0",
     "mysql": "^2.18.1",
     "qrcode": "^1.4.4",
     "random-string": "^0.2.0",
     "speakeasy": "^2.0.0",
-    "twilio": "^3.42.2"
+    "twilio": "^3.42.2",
+    "xlsx": "^0.16.6"
   },
   "devDependencies": {},
   "autoload": {

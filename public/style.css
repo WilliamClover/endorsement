@@ -5,17 +5,37 @@ body {
   height: 100%;
   width: 100%;
 }
-
-/* body {
-  font-family: "Montserrat", sans-serif;
-  font-weight: 300;
-} */
+input {
+  font-size: 0.8rem !important;
+}
+::-webkit-input-placeholder {
+  font-style: italic;
+  color: #aaa !important;
+}
+:-moz-placeholder {
+  font-style: italic;
+  color: #aaa !important;
+}
+::-moz-placeholder {
+  font-style: italic;
+  color: #aaa !important;
+}
+:-ms-input-placeholder {
+  font-style: italic;
+  color: #aaa !important;
+}
 .timeline {
   padding-left: 30px;
+}
+.chat-messages {
+  max-height: 500px !important;
 }
 * {
   margin: 0;
   padding: 0;
+}
+.principal td {
+  border-top-width: 3px;
 }
 .form-control.is-danger {
   background-size: 100% 100%, 100% 100%;
@@ -110,6 +130,12 @@ body {
 .htCore > tbody > tr > td.htDisabled:before {
   content: "Disabled";
   font-style: italic;
+}
+.handsontable .htCore td.htInvalid {
+  background-color: #f17878 !important;
+}
+.handsontable .htAutocompleteArrow {
+  color: #555 !important;
 }
 @keyframes slideUp {
   0% {
@@ -223,10 +249,32 @@ table.dataTable.dtr-inline.collapsed
   > th:first-child::before {
   background-color: #a20000;
 }
-/* table.dataTable > tbody > tr.child ul.dtr-details {
-  width: 100%;
+
+.custom-switch .custom-control-input:checked + .custom-control-label:before {
+  background-color: #5fc27e !important;
+  border: 1px solid #5fc27e !important;
 }
-table.dataTable > tbody > tr.child ul.dtr-details li {
-  width: 30%;
-  display: inline-block;
+.noauthFooter {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: right;
+}
+.handsontable.listbox td {
+  font-size: 12px;
+  /*white-space: unset !important;*/
+}
+
+.clearBoth:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+/* .handsontable.listbox,
+.ht_master .wtHolder {
+  height: auto !important;
+}
+.handsontable {
+  overflow: auto !important;
 } */

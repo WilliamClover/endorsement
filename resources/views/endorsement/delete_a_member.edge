@@ -61,8 +61,9 @@
                         <div class="col-6" id="MASTERcontainer">
                             <select class="selectMaster js-states form-control">
                                 <option></option>
-                                @each(master in masters)
-                                <option value="{{master.master}}">{{master.master}}</option>
+                                @each(master_account in master_accounts)
+                                <option value="{{master_account.master_account}}">{{master_account.master_account}}
+                                </option>
                                 @endeach
                             </select>
                         </div>
@@ -117,7 +118,7 @@
                     alert("You didn't select any entry")
             }else{
                 $.ajax({
-                    url: "{{ route('tableTodelete') }}",
+                    url: "{{ route('deleteAMember1') }}",
                     type: "post",
                     data:  {cor:cor,step:2,data:dataArray},
                     success: function (res) {
@@ -136,6 +137,9 @@
             var valError=0
             $("#datatables_step2 tr.selected").each(function () {
                 var entryId = $(this).attr("id");
+                var firstName = $(this).attr("data-fname");
+                var lastName = $(this).attr("data-lname");
+                var entryId = $(this).attr("id");
                 if($(this).find(".reason textarea").css("display")!="none"){
                     if($(this).find(".reason").children("textarea").val()!=""){
                         var reason = $(this).find(".reason").children("textarea").val();
@@ -145,11 +149,11 @@
                 }else{
                     var reason = null
                 }
-                step2Data.push({id:entryId,reason:reason})
+                step2Data.push({staff_id:entryId.slice(10),reason:reason,first_name:firstName,last_name:lastName})
             });
             if(valError==0){
                 $.ajax({
-                    url: "{{ route('deleteMemberFromDb') }}",
+                    url: "{{ route('deleteAMember3') }}",
                     type: "post",
                     data:  {cor:cor,step:2,data:step2Data},
                     success: function (res) {
@@ -202,16 +206,16 @@
             placeholder: "Select MASTER Account"
         });
         $('.selectMaster').on('change', function (e) {
-            master =$(this).val();
+            master_account =$(this).val();
             $(".selectCOR option").remove()
             $.ajax({
                 url: "{{ route('getCORFromMaster') }}",
                 type: "get",
-                data: {master:$(this).val()},
+                data: {master_account:$(this).val()},
                 success: function (res) {
                     $(".selectCOR").append("<option></option>")
                     $.each(res, function( index, value ) {
-                        $(".selectCOR").append("<option value='"+value.country +"'>"+value.country +"</option>")
+                        $(".selectCOR").append("<option value='"+value.cor +"'>"+value.cor +"</option>")
                     });
                 },
                 error: function(xhr, status, error) {
@@ -227,11 +231,11 @@
         $('.selectCOR').on('change', function (e) {
             $("#handsOnTableCont").css("display","block")
             cor =$(this).val();
-                $("#MASTERcontainer").html("<strong>MASTER Account:</strong> "+master+"</strong>")
+                $("#MASTERcontainer").html("<strong>MASTER Account:</strong> "+master_account+"</strong>")
                 $("#CORcontainer").html("<strong>Country of Residence:</strong> "+cor+"</strong>")
                 
                 $.ajax({
-                    url: "{{ route('tableTodelete') }}",
+                    url: "{{ route('deleteAMember1') }}",
                     type: "post",
                     data:  {cor:cor,step:1,data:[]},
                     success: function (res) {

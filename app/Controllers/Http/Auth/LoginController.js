@@ -13,16 +13,16 @@ const client = use("twilio")(
 
 class LoginController {
   showLogin({ session, view }) {
+    const userEmail = session.get("userEmail");
     session.forget("request_all");
-    return view.render("auth.login.login1");
+    return view.render("auth.login.login1", { userEmail: userEmail });
   }
   async login({ request, auth, session, response }) {
-    //if is_canceled != 0, means the account is deleted and the user is not able to connect
     session.put("request_all", request.all());
     const firstTimeLogin = await Database.select("secret_totp")
       .from("users")
       .where("email", request.input("email"))
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .first();
     if (firstTimeLogin.secret_totp == null) {
       return response.route("login2");
@@ -54,14 +54,19 @@ class LoginController {
     const user = await User.query()
       .where("email", email)
       .whereNot("accstatus", 0)
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .first();
     //verify password
     if (user) {
+      let phoneArray = user.phonenumber.split("");
+      phoneArray = phoneArray.map((e, i) => {
+        return i < 4 || i > phoneArray.length - 3 ? e : "x";
+      });
+      const hiddenPhoneNumber = phoneArray.join("");
+
       const passwordVerified = await Hash.verify(password, user.password);
       if (passwordVerified) {
         if (user.secret_totp == "sms") {
-          //TWILIO OTP START
           await client.verify
             .services(Env.get("TWILIO_SERVICE_ID"))
             .verifications.create({
@@ -69,12 +74,14 @@ class LoginController {
               channel: "sms",
             })
             .then((data) => {
-              //check how to return a success and errors on twilio
               return data;
             });
-          //TWILIO OTP END
         }
-        return view.render("auth.loginOTP", { secret: user.secret_totp });
+        return view.render("auth.loginOTP", {
+          secret: user.secret_totp,
+          phoneNumber: user.phonenumber,
+          hiddenPhoneNumber: hiddenPhoneNumber,
+        });
       }
       //display error
       session.flash({
@@ -100,7 +107,7 @@ class LoginController {
     const user = await User.query()
       .where("email", email)
       .whereNot("accstatus", 0)
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .first();
     const verifyPhoneNumber = await client.verify
       .services(Env.get("TWILIO_SERVICE_ID"))
@@ -133,7 +140,7 @@ class LoginController {
     const user = await User.query()
       .where("email", email)
       .whereNot("accstatus", 0)
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .first();
 
     var verified = speakeasy.totp.verify({
@@ -142,7 +149,6 @@ class LoginController {
       token: otpCode,
       window: 2,
     });
-
     if (verified === true) {
       //login user
       await auth.remember(!!remember).login(user);
@@ -183,7 +189,7 @@ class LoginController {
     const user = await User.query()
       .where("email", email)
       .whereNot("accstatus", 0)
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .first();
 
     if (validation.fails()) {

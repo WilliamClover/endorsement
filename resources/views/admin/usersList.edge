@@ -37,34 +37,34 @@
                             <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
                             <td>{{ user.phonenumber }}</td>
                             <td>
-                                @if(user.is_canceled==1)
-                                <span class="badge badge-danger">Deleted</span>
-                                @else
                                 @if(user.accstatus==0)
-                                <span class="badge badge-warning">Inactive</span>
+                                <span class="badge badge-info">Inactive</span>
                                 @elseif(user.accstatus==1)
                                 <span class="badge badge-success">Active</span>
-                                @endif
+                                @elseif(user.accstatus==2)
+                                <span class="badge badge-secondary">Linked</span>
+                                @elseif(user.accstatus==3)
+                                <span class="badge badge-danger">Disabled</span>
                                 @endif
                             </td>
                             <td>
-                                @if(user.is_canceled===0)
+                                @if(user.accstatus!==3)
                                 @if(user.linked_user_id!==0 && user.linked_user_id!==null)
-                                Linked to
                                 @each(linkedUser in linkedUsers)
-                                @if(linkedUser.contactid===$parent.user.linked_user_id)
-                                {{linkedUser.contact}}
+                                @if(linkedUser.client_contact_id===$parent.user.linked_user_id)
+                                {{linkedUser.client_contact_name}}
                                 @endif
 
                                 @endeach
                                 <form class="editLinkingUser" style="float:right">
                                     <!--form done with ajax-->
                                     {{ csrfField() }}
-                                    <input type="hidden" class="form-control form-control-lg" name="email"
-                                        value="{{user.email}}" />
-                                    <i class="cursorPointer align-middle fas fa-fw fa-edit" data-toggle="tooltip"
-                                        data-placement="top" data-original-title="Update linked user"
-                                        onclick="$(this).parent('form').submit();"></i>
+                                    <input type="text" class="form-control form-control-lg" name="email"
+                                        id="editLinkEmail" value="{{user.email}}" style="display:none;" />
+
+                                    <span class="input-group-append">
+                                        <button class="btn btn-secondary" type="submit">Unlink User</button>
+                                    </span>
                                 </form>
                                 @else
                                 <form class="linkedUserForm">
@@ -74,11 +74,12 @@
                                         <input type="hidden" name="registeredUserId" id="registeredUserId"
                                             value="{{user.id}}">
                                         <select class="custom-select flex-grow-1 select2" data-toggle="select2">
+                                            <option></option>
                                             @each(linkedUser in linkedUsers)
 
-                                            @if(linkedUser.contactid!==$parent.user.linked_user_id)
-                                            <option value="{{linkedUser.contactid}}">
-                                                {{lowerCase(linkedUser.contact)}}
+                                            @if(linkedUser.client_contact_id!==$parent.user.linked_user_id)
+                                            <option value="{{linkedUser.client_contact_id}}">
+                                                {{lowerCase(linkedUser.client_contact_name)}}
                                             </option>
                                             @endif
                                             @endeach
@@ -92,17 +93,23 @@
                                 @endif
                             </td>
                             <td>
-                                @if(user.is_canceled===0)
-                                <form class="deleteBtn">
-                                    <!--form done with ajax-->
-                                    {{ csrfField() }}
+                                <div class="custom-control custom-switch">
                                     <input type="hidden" class="form-control form-control-lg" name="email"
                                         value="{{user.email}}" />
-                                    <i class="cursorPointer align-middle fas fa-fw fa-trash-alt" data-toggle="tooltip"
-                                        data-placement="top" data-original-title="Delete User"
-                                        onclick="$(this).parent('form').submit();"></i>
-                                </form>
-                                @endif
+                                    @if(user.accstatus!==3)
+                                    <input type="checkbox" class="custom-control-input switcheInput"
+                                        id="disableEnable{{user.linked_user_id}}" checked data-toggle="tooltip"
+                                        data-placement="top" data-original-title="Disable User">
+                                    <label class="custom-control-label"
+                                        for="disableEnable{{user.linked_user_id}}"></label>
+                                    @else
+                                    <input type="checkbox" class="custom-control-input switcheInput"
+                                        id="disableEnable{{user.linked_user_id}}" data-toggle="tooltip"
+                                        data-placement="top" data-original-title="Enable User">
+                                    <label class="custom-control-label"
+                                        for="disableEnable{{user.linked_user_id}}"></label>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endeach
@@ -118,8 +125,48 @@
 @section('javascript')
 <script>
     $(function() {
-        // Select2
+        $(".custom-switch .switcheInput").on("change", function(e){
+            var email = $(this).siblings('input[name ="email"]').attr("value")
+            if(e.target.checked){
+                    $.ajax({
+                        url: "{{ route('disableUser') }}",
+                        type: "post",
+                        data: {email: email,status:1} ,
+                        success: function (res) {
+                            //$('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                        location.reload(); 
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Something went wrong')
+                            console.log(xhr.responseText);
+                        }
+                    });
+            }else{
+                var answer = window.confirm("Are you sure you want to delete this User?")
+                if(answer!==false){
+                    $.ajax({
+                        url: "{{ route('disableUser') }}",
+                        type: "post",
+                        data: {email: email,status:3} ,
+                        success: function (res) {
+                            //$('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                        location.reload(); 
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Something went wrong')
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }else{
+                    e.target.checked=false
+                    e.siblings(".custom-control-label").text("Enable")
+                }
+            }
+        })
+    //     // Select2
         $(".select2").select2({
+            placeholder: "Select a user",
+            allowClear: true,
             width: 300
         });
         $('.select2').on('change', function (e) {
@@ -131,7 +178,6 @@
                 null,
                 null,
                 { "searchable": false },
-                { "searchable": false, "orderable": false },
                 { "searchable": false, "orderable": false },
                 { "searchable": false, "orderable": false },
             ],
@@ -155,7 +201,6 @@
                     var title = "";
                     var type = "success";
                     showFlashMessages(message,title,type)
-                    console.log($(res).find("#datatables-dashboard-traffic"))
                     $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
                 },
                 error: function(xhr, status, error) {
@@ -164,38 +209,19 @@
                 }
             });
         })
-
-        $('form.deleteBtn').submit(function(e) {
-            var answer = window.confirm("Are you sure you want to delete this User?")
-            e.preventDefault();
-            if(answer!==false){
-                var values = $(this).serialize();
-                $.ajax({
-                    url: "{{ route('deleteUser') }}",
-                    type: "post",
-                    data: values ,
-                    success: function (res) {
-                        $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Something went wrong')
-                        console.log(xhr.responseText);
-                    }
-                });
-            }
-        })
+        
 
 
         $('form.linkedUserForm').submit(function(e) {
                 e.preventDefault();
                 var values = $(this).serialize();
-                console.log(values)
                 $.ajax({
                 url: "{{ route('linkUser') }}",
                 type: "post",
                 data: values ,
                 success: function (res) {
-                $('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                        //$('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                        location.reload(); 
                 },
                 error: function(xhr, status, error) {
                     alert('Something went wrong')
@@ -206,17 +232,18 @@
 
 
         $('form.editLinkingUser').submit(function(e) {
-            var answer = window.confirm("Are you sure you want to changed linked user?")
+            var answer = window.confirm("Are you sure you want to unlinked user?")
             e.preventDefault();
+            var values = $(this).serialize();
             if(answer!==false){
-                var values = $(this).serialize();
                 $.ajax({
                     url: "{{ route('unlinkUser') }}",
                     type: "post",
                     data: values ,
-        dataType : "html",
                     success: function (res) {
-                        $('#datatables-dashboard-traffic').replaceWith($(res).find("#datatables-dashboard-traffic"));
+                        //console.log(res)
+                        //$('#datatables-dashboard-traffic').html($(res).find("#datatables-dashboard-traffic"));
+                        location.reload(); 
                     },
                     error: function(xhr, status, error) {
                         alert('Something went wrong')

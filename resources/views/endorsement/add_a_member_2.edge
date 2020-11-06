@@ -63,6 +63,8 @@
 <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 {{ script('assets/js/hot-functions') }}
 <script>
+    var categoriesValidator=false, relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
+
     $(function() {
         var tableHeaders = {{{ toJSON(tableHeaders) }}},
         invalidContent = {{{ toJSON(invalidContent) }}},
@@ -70,7 +72,9 @@
         webReqId={{{ webReqId }}},
         policies={{{ toJSON(policies) }}},
         contact ={{{ toJSON(contact) }}},
+        client_contact_id ={{{ toJSON(client_contact_id) }}},
         nationalities={{{ toJSON(nationalities) }}},
+        companyName={{{ toJSON(companyName) }}},
         emirates={{{ toJSON(emirates) }}},
         memberTypes={{{ toJSON(memberTypes) }}},
         entityTypes={{{ toJSON(entityTypes) }}},
@@ -78,267 +82,10 @@
         residentialLocations={{{ toJSON(residentialLocations) }}},
         workLocations={{{ toJSON(workLocations) }}},
         employeesSalaryBrackets={{{ toJSON(employeesSalaryBrackets) }}},
-        residentialLocations={{{ toJSON(residentialLocations) }}}
-        var relationValue=null, nationalityValue=null, ageValue=null, uaeVisaIssuanceValue=null, memberTypeValue=null, gdrfaValue=null, entityTypeValue=null,emptyRow=true
+        residentialLocations={{{ toJSON(residentialLocations) }}},
+        HOTcols={{{ toJSON(HOTcols) }}}
         const policiesLength=policies.length
-        var min2ifNotEmpty = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    var min2=minLengthfunction(value,2)
-                    var lettersAndSpaces=lettersAndSpacesfunction(value)
-                    if (String(value).length != 0) {
-                        if(min2.validation==true && lettersAndSpaces.validation==true){
-                            callback(true)
-                            $("#text-error").text("")
-                        }else{
-                            callback(false)
-                            $("#text-error").text("The selected data field "+min2.message+lettersAndSpaces.message)
-                        }
-                    }else{
-                        callback(true);
-                        $("#text-error").text("")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        };
-        var notEmpty = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    callback(true)
-                    $("#text-error").html("")
-                }else{
-                    callback(false)
-                    $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        };
-        var validEmailIfPrinciple = function (value, callback) {
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var notEmpty=notEmptyfunction(value)
-                var validEmail=validEmailfunction(value)
-                if(relationValue=="1= PRINCIPAL"){
-                    if(notEmpty.validation==true && validEmail.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+validEmail.message+"</p>")
-                    }
-                }else{
-                    if(validEmail.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+validEmail.message+"</p>")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var namesValidation = function(value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    var notEmpty=notEmptyfunction(value)
-                    var min2=minLengthfunction(value,2)
-                    var lettersAndSpaces=lettersAndSpacesfunction(value)
-                    if(notEmpty.validation==true && min2.validation==true && lettersAndSpaces.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+min2.message+lettersAndSpaces.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var alphaNumericIfNotEmptyValidation = function(value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var alphaNumeric=alphaNumericfunction(value)
-                if (String(value).length != 0) {
-                    if(alphaNumeric.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+alphaNumeric.message+"</p>")
-                    }
-                }else{
-                    callback(true);
-                    $("#text-error").html("")
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var phoneNumberIfPrinciple = function (value, callback) {
-            
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var checkPhoneNumber=checkPhoneNumberfunction(value)
-                var notEmpty=notEmptyfunction(value)
-                if(relationValue=="1= PRINCIPAL"){
-                    if(notEmpty.validation==true){
-                        if(checkPhoneNumber.validation==true){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                        }
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }
-                }else{
-                        if(checkPhoneNumber.validation==true){
-                            callback(true)
-                            $("#text-error").html("")
-                        }else{
-                            callback(false)
-                            $("#text-error").html("<p>The selected data field "+checkPhoneNumber.message+"</p>")
-                        }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var employeeStaffId= function (value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var min2=minLengthfunction(value,2)
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    if(min2.validation==true){
-                        callback(true)
-                        $("#text-error").html("")
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+min2.message+"</p>")
-                    }
-                }else{
-                    if(relationValue=="2= SPOUSE" || relationValue=="3= CHILD"){
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+notEmpty.message+"</p>")
-                    }else{
-                        callback(true)
-                        $("#text-error").html("")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var positionField= function (value,callback){
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                var min3=minLengthfunction(value, 3)
-                var notEmpty=notEmptyfunction(value)
-                if(notEmpty.validation==true){
-                    if(min3.validation==true){
-                        callback(true)
-                        $("#text-error").text("")
-                    }else{
-                        callback(false)
-                        $("#text-error").text("The selected data field " + min3.message)
-                    }
-                }else{
-                    if(relationValue=="1= PRINCIPAL" && nationalityValue=="Kingdom Of Saudi Arabia"){
-                        callback(false)
-                        $("#text-error").text("The selected data field " + notEmpty.message)
-                    }else{
-                        callback(true)
-                        $("#text-error").text("")
-                    }
-                }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
-        var acceptableDate=function(value,callback){
-            
-            if(emptyRow){
-                callback(true)
-                $("#text-error").html("")
-            }else{
-                if(value){
-                    const timestampFromValue=Date.parse(value);
-                    const currentTimestamp=Date.now()
-                    const ageFromtimestamps=Math.floor((currentTimestamp-timestampFromValue) / (365 * 24 * 60 * 60 * 1000));
-                    
-                    var validateDate=validateDatefunction(timestampFromValue)
-                    if(validateDate.validation==true){
-                        if(ageFromtimestamps>99 || ageFromtimestamps<0){
-                            callback(false)
-                            $("#text-error").html("Age should be from 0 to 99")
-                        }else{
-                            if(relationValue=="3= CHILD" && ageFromtimestamps>25){
-                                callback(false)
-                                $("#text-error").html("Only children under 25 are dependant")
-                            }else{
-                                callback(true)
-                                $("#text-error").html("")
-                            }
-                        }
-                    }else{
-                        callback(false)
-                        $("#text-error").html("<p>The selected data field "+validateDate.message+"</p>")
-                    }
-                }else{
-                    callback(false)
-                    $("#text-error").html("This field is mandatory")
-                }
-            }
-        }
+        //Validations done: dropdown, notEmpty, email, minimum length 2, if filled min length
         var emiratesIdNumber=function(value,callback){
             
             if(emptyRow){
@@ -735,7 +482,7 @@
                 if(value){
                 var notEmpty=notEmptyfunction(value)
                 const timestampFromValue=Date.parse(value);
-                var validateDate=validateDatefunction(timestampFromValue)
+                var validateDate=validDatefunction(timestampFromValue)
                     if(notEmpty.validation==true){
                         if(validateDate.validation==true){
                             callback(true)
@@ -833,81 +580,55 @@
                 }
             }
         }
+        var categoriesValidation= function(value, callback){
+            if(emptyRow || value){
+                callback(true)
+                $("#text-error").html("")
+            }else{
+                if(categoriesValidator==true){
+                    callback(true)
+                    $("#text-error").html("")
+                }else{
+                    callback(false)
+                    $("#text-error").html("You should enter at least 1 category")
+                }
+            }
+        }
         columnsValidations=[]
-        tableHeaders.forEach((headerName,headerIndex) => {
-             if(headerName=="Company Name"){
-                columnsValidations.push({data: "Company Name", type: 'autocomplete', source: ["example1","example2","example3","example4","example5"] ,allowInvalid: true})
-             }else if(headerName=="Shop or Site or Department"){
-                columnsValidations.push({data: "Shop or Site or Department", type: "text", validator:notEmpty ,allowInvalid: true})
-            }else if(headerName=="Employee Staff ID"){
-                columnsValidations.push({data: "Employee Staff ID", type: "text", validator:employeeStaffId ,allowInvalid: true})
-             }else if(headerName=="First Name"){
-                columnsValidations.push({data: "First Name", type: "text", validator:namesValidation ,allowInvalid: true})
-             }else if(headerName=="Second Name"){
-                columnsValidations.push({data: "Second Name", type: "text", validator:min2ifNotEmpty ,allowInvalid: true})
-             }else if(headerName=="Family Name"){
-                columnsValidations.push({data: "Family Name", type: "text", validator:namesValidation ,allowInvalid: true})
-             }else if(headerName=="Relation"){
-                columnsValidations.push({data: "Relation", type: 'dropdown', source: ["1= PRINCIPAL","2= SPOUSE","3= CHILD"]})
-             }else if(headerName=="DOB"){
-                columnsValidations.push({data: "DOB", type: "date",dateFormat:'MM/DD/YYYY', correctFormat: true, validator:acceptableDate ,allowInvalid: true})
-             }else if(headerName=="Gender"){
-                columnsValidations.push({data: "Gender", type: 'dropdown', source: ["1= MALE","2= FEMALE"] ,allowInvalid: true})
-             }else if(headerName=="Nationality"){
-                columnsValidations.push({data: "Nationality", type: 'dropdown', source: nationalities ,allowInvalid: true})
-             }else if(headerName=="Marital Status"){
-                columnsValidations.push({data: "Marital Status", type: 'dropdown', source: ["1= SINGLE","2= MARRIED","3= DIVORCED"], validator:statusValidation ,allowInvalid: true})
-             }else if(headerName=="Cost Sharing"){
-                columnsValidations.push({data: "Cost Sharing", type: 'dropdown', source: ["CO-NIL","CO-NSSF"] ,allowInvalid: true})
-             }else if(headerName=="Position"){
-                columnsValidations.push({data: "Position", type: "text", validator:positionField ,allowInvalid: true})
-             }else if(headerName=="Grade"){
-                columnsValidations.push({data: "Grade", type: "text", validator:alphaNumericIfNotEmptyValidation ,allowInvalid: true})
-             }else if(headerName=="Mobile No"){
-                columnsValidations.push({data: "Mobile No", type: "text", validator:phoneNumberIfPrinciple ,allowInvalid: true})
-             }else if(headerName=="E-mail"){
-                columnsValidations.push({data: "E-mail", type: "text", validator:validEmailIfPrinciple ,allowInvalid: true})
-             }else if(headerName=="NATIONAL ID"){
-                columnsValidations.push({data: "NATIONAL ID", type: "text", validator:nationalIdValidation ,allowInvalid: true})
-             }else if(headerName=="EMIRATES ID NO."){
-                columnsValidations.push({data: "EMIRATES ID NO.", type: "text", validator:emiratesIdNumber ,allowInvalid: true})
-             }else if(headerName=="PASSPORT NO."){
-                columnsValidations.push({data: "PASSPORT NO.", type: "text", validator:distinctNumbers ,allowInvalid: true})
-             }else if(headerName=="UID"){
-                columnsValidations.push({data: "UID", type: "text", validator:uidNumbers ,allowInvalid: true})
-             }else if(headerName=="GDRFAFileNumber"){
-                columnsValidations.push({data: "GDRFAFileNumber", type: "text", validator:gdrfaFileNumber ,allowInvalid: true})
-             }else if(headerName=="EMIRATE OF VISA ISSUANCE"){
-                columnsValidations.push({data: "EMIRATE OF VISA ISSUANCE", type: 'dropdown', source:emirates, validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="MEMBER TYPE"){
-                columnsValidations.push({data: "MEMBER TYPE", type: 'dropdown', source: memberTypes, validator:memberTypesValidation ,allowInvalid: true})
-             }else if(headerName=="ENTITY TYPE"){
-                columnsValidations.push({data: "ENTITY TYPE", type: 'dropdown', source: entityTypes, validator:entityTypesValidation ,allowInvalid: true})
-             }else if(headerName=="ESTABLISHMENT ID#"){
-                columnsValidations.push({data: "ESTABLISHMENT ID#", type: 'text', validator:estIdValidation ,allowInvalid: true})
-             }else if(headerName=="RESIDENTIAL LOCATION"){
-                columnsValidations.push({data: "RESIDENTIAL LOCATION", type: 'dropdown', source: residentialLocations, validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="WORK LOCATION"){
-                columnsValidations.push({data: "WORK LOCATION", type: 'dropdown', source: workLocations, validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="EMPLOYEES SALARY BRACKET"){
-                columnsValidations.push({data: "EMPLOYEES SALARY BRACKET", type: 'dropdown', source: employeesSalaryBrackets, validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="COMMISSION"){
-                columnsValidations.push({data: "COMMISSION", type: 'dropdown', source: ["example1","example2","example3","example4","example5"], validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="ENTITY E-MAIL ID"){
-                columnsValidations.push({data: "ENTITY E-MAIL ID", type: "text", validator:validEmailAndMandatory ,allowInvalid: true})
-             }else if(headerName=="CBJOD_1_1"){
-                columnsValidations.push({data: "CBJOD_1_1", type: "text", validator:notEmpty ,allowInvalid: true})
-             }else if(headerName=="CBJOD_1_2"){
-                columnsValidations.push({data: "CBJOD_1_2", type: "text", validator:notEmpty ,allowInvalid: true})
-             }else{
-                columnsValidations.push({data: "", type: "text", validator:notEmpty ,allowInvalid: true})
-             }
+        HOTcols.forEach((entry,index) => {
+            switch(entry.data) {
+                case "Shop or Site or Department": entry['validator']=notEmpty; break;
+                case "Employee Staff ID": entry['validator']=employeeStaffId; break;
+                case "First Name": entry['validator']=namesValidation; break;
+                case "Second Name": entry['validator']=min2ifNotEmpty; break;
+                case "Family Name": entry['validator']=namesValidation; break;
+                case "DOB": entry['validator']=acceptableDate; break;
+                case "Nationality": entry['validator']=nationalities; break;
+                case "Marital Status": entry['validator']=statusValidation; break;
+                case "Position": entry['validator']=positionField; break;
+                case "Grade": entry['validator']=alphaNumericIfNotEmpty; break;
+                case "Mobile No": entry['validator']=phoneNumberIfPrincipal; break;
+                case "E-mail": entry['validator']=validEmailIfPrinciple; break;
+                case "NATIONAL ID": entry['validator']=nationalIdValidation; break;
+                case "EMIRATES ID NO.": entry['validator']=emiratesIdNumber; break;
+                case "PASSPORT NO.": entry['validator']=distinctNumbers; break;
+                case "UID": entry['validator']=uidNumbers; break;
+                case "GDRFAFileNumber": entry['validator']=gdrfaFileNumber; break;
+                case "EMIRATE OF VISA ISSUANCE": entry['validator']=notEmpty; break;
+                case "MEMBER TYPE": entry['validator']=memberTypesValidation; break;
+                case "ENTITY TYPE": entry['validator']=entityTypesValidation; break;
+                case "ESTABLISHMENT ID#": entry['validator']=estIdValidation; break;
+                case "RESIDENTIAL LOCATION": entry['validator']=notEmpty; break;
+                case "WORK LOCATION": entry['validator']=notEmpty; break;
+                case "EMPLOYEES SALARY BRACKET": entry['validator']=notEmpty; break;
+                case "COMMISSION": entry['validator']=notEmpty; break;
+                case "ENTITY E-MAIL ID": entry['validator']=validEmailAndMandatory; break;
+            }
         })
-        console.log(invalidContent)
         var hotSettings = {
                 colHeaders: tableHeaders,
                 data: invalidContent,
-                columns: columnsValidations,
+                columns: HOTcols,
                 minSpareRows: 0,
                 rowHeaders: true,
                 columnSorting: true,
@@ -937,29 +658,27 @@
                 })
             })
             hot.addHook('beforeValidate', function(val, row, prop) {
-                    emptyRow=hot.isEmptyRow(row)
+                emptyRow=hot.isEmptyRow(row)
             });
-            hot.updateSettings({
-                afterChange: function (change, source) {
-                    //validationArray=[]
-                    //invalidCount=0
-                    var tableData = hot.getData();
-                    var tableRow = tableData.length-1;
-                    var currentRow=change[0][0]
-                    hot.validateRows([currentRow], (valid) => {
-                        if(valid==true){
-                            var data = this.getDataAtRow(currentRow);
-                            let addTdToTable="<tr><td><i class='align-middle fas fa-fw fa-check text-success'></i></td>"
-                            data.forEach(function(cellData,cellIndex){
-                                addTdToTable+="<td>"+cellData+"</td>"
-                            })
-                            addTdToTable+="</tr>"
-                            $("#validtbody").append(addTdToTable)
-                            hot.alter('remove_row', currentRow, 1);
-                        }
+        
+        hot.addHook('afterChange', function(change, source) {
+            var tableData = hot.getData();
+            var tableRow = tableData.length-1;
+            var currentRow=change[0][0]
+            hot.validateRows([currentRow], (valid) => {
+                if(valid==true){
+                    var data = this.getDataAtRow(currentRow);
+                    let addTdToTable="<tr><td><i class='align-middle fas fa-fw fa-check text-success'></i></td>"
+                    data.forEach(function(cellData,cellIndex){
+                        addTdToTable+="<td>"+cellData+"</td>"
                     })
+                    addTdToTable+="</tr>"
+                    $("#validtbody").append(addTdToTable)
+                    hot.alter('remove_row', currentRow, 1);
                 }
             })
+
+        })
             if(invalidDetails){
                 invalidDetails.forEach((rowDetails,rowIndex) => {
                     rowDetails.forEach(cellProp => {
@@ -972,16 +691,15 @@
             $("#step2Submit").fadeIn();
         
             Handsontable.dom.addEvent(document.getElementById('step2Submit'), 'click', async function() {
-                    var tableData = hot.getData();
-                    if(tableData.length!=0){
-                        $('#confirmationDialog').modal()
-                    }else{
-                        
-                var dataDB=table2array( "validtable" )
-                $('#confirmationDialog').modal('hide')
-                    var addHealthTempId=0;
-                    var dataArray={master:master,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
+                var tableData = hot.getData();
+                if(tableData.length!=0){
+                    $('#confirmationDialog').modal()
+                }else{
                     
+                    var dataDB=table2array( "validtable" )
+                    $('#confirmationDialog').modal('hide')
+                    var addHealthTempId=0;
+                    var dataArray={master_account:master_account,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
                     cor = cor.toUpperCase()
                     dataDB.forEach(function(updatedData,rowIndex){
                         var tableHeaderArray=dataDB[0].slice(Math.max(updatedData.length - policiesLength, 0))
@@ -991,9 +709,9 @@
                             var curHeaderArray=[]
                             tableHeaderArray.forEach(function(headerCont,index){
                                 var category=categoriesArray[index]
-                                curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                curHeaderArray= {policy_id: headerCont,cat: category,Add_health_temp_id:addHealthTempId,web_req_id:webReqId,person_id:client_contact_id}
+                                dataArray.dataValidCategories.push(curHeaderArray)
                             })
-                            dataArray.dataValidCategories.push(curHeaderArray)
                             switch (cor) {
                                 case 'DUBAI':
                                 case 'DUBAI LSB':
@@ -1005,7 +723,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1028,8 +746,9 @@
                                         commission: updatedData[27],
                                         entity_contact_number: updatedData[28],
                                         entity_email_id: updatedData[29],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1043,7 +762,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1056,8 +775,9 @@
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
                                         previously_insured: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                                     Add_health_temp_id:addHealthTempId
                                     })
@@ -1071,7 +791,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1083,8 +803,9 @@
                                         emirates_id: updatedData[16],
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                                     Add_health_temp_id:addHealthTempId
                                     })
@@ -1098,7 +819,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1108,8 +829,9 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         national_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1123,7 +845,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1136,8 +858,9 @@
                                         iqama_id: updatedData[17],
                                         iqama_expire_at: updatedData[18],
                                         sponsor_id: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1151,7 +874,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1161,8 +884,9 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         kuwait_id : updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1176,7 +900,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1186,14 +910,15 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         qatar_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
                                 break;
                                 default:
-                                    dataArray.dataInvalid.push({
+                                    dataArray.dataValid.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
                                         employee_staff_id: updatedData[2],
@@ -1201,7 +926,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1210,15 +935,15 @@
                                         grade: updatedData[13],
                                         mobile: updatedData[14],
                                         email: updatedData[15],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
                             }
                         }
                     })
-                    
                     $.ajax({
                         url: "{{ route('addAMember3') }}",
                         type: "post",
@@ -1232,9 +957,7 @@
                             console.log(xhr.responseText);
                         }
                     });
-            
-
-                    }
+                }
             })
             Handsontable.dom.addEvent(document.getElementById('confirmYes'), 'click', async function() {
                 var dataDB=table2array( "validtable" )
@@ -1242,244 +965,11 @@
                     var addHealthTempId=0;
                     var tableData = hot.getData();
                     var tableHeader = hot.getColHeader();
-                    var dataArray={master:master,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
+                    var dataArray={master_account:master_account,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
                     
                     cor = cor.toUpperCase()
-                    dataDB.forEach(function(updatedData,rowIndex){
-                        var tableHeaderArray=dataDB[0].slice(Math.max(updatedData.length - policiesLength, 0))
-                        if(rowIndex!=0){
-                            addHealthTempId++;
-                            var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
-                            var curHeaderArray=[]
-                            tableHeaderArray.forEach(function(headerCont,index){
-                                var category=categoriesArray[index]
-                                curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
-                            })
-                            dataArray.dataValidCategories.push(curHeaderArray)
-                            switch (cor) {
-                                case 'DUBAI':
-                                case 'DUBAI LSB':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        emirates_id: updatedData[16],
-                                        passport_num: updatedData[17],
-                                        uid: updatedData[18],
-                                        gdrfa_file_number: updatedData[19],
-                                        emirate_of_visa_issuance: updatedData[20],
-                                        member_type: updatedData[21],
-                                        entity_type: updatedData[22],
-                                        establishment_id: updatedData[23],
-                                        residential_location: updatedData[24],
-                                        work_location: updatedData[25],
-                                        employees_salary_bracket: updatedData[26],
-                                        commission: updatedData[27],
-                                        entity_contact_number: updatedData[28],
-                                        entity_email_id: updatedData[29],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'AUH':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        emirates_id: updatedData[16],
-                                        passport_num: updatedData[17],
-                                        uid: updatedData[18],
-                                        previously_insured: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                                    Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'OTHER EMIRATES':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        emirates_id: updatedData[16],
-                                        passport_num: updatedData[17],
-                                        uid: updatedData[18],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                                    Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'JORDAN':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        national_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'KSA':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        saudi_id: updatedData[16],
-                                        iqama_id: updatedData[17],
-                                        iqama_expire_at: updatedData[18],
-                                        sponsor_id: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'KUWAIT':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        kuwait_id : updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                case 'QATAR':
-                                    dataArray.dataValid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        qatar_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                                break;
-                                default:
-                                    dataArray.dataInvalid.push({
-                                        company_name: updatedData[0],
-                                        s_department: updatedData[1],
-                                        employee_staff_id: updatedData[2],
-                                        first_name: updatedData[3],
-                                        second_name: updatedData[4],
-                                        last_name: updatedData[5],
-                                        relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
-                                        gender: updatedData[8],
-                                        nationality: updatedData[9],
-                                        marital_status: updatedData[10],
-                                        cost_sharing: updatedData[11],
-                                        position: updatedData[12],
-                                        grade: updatedData[13],
-                                        mobile: updatedData[14],
-                                        email: updatedData[15],
-                                        contact: contact.contact,
-                                        master: master,
-                                        web_req_id:webReqId,
-                                        Add_health_temp_id:addHealthTempId
-                                    })
-                            }
-                        }
-                    })
+
+
                     tableData.forEach(function(updatedData,rowIndex){
                         addHealthTempId++;
                         switch (cor) {
@@ -1495,7 +985,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1518,15 +1008,16 @@
                                     commission: updatedData[27],
                                     entity_contact_number: updatedData[28],
                                     entity_email_id: updatedData[29],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1541,7 +1032,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1554,15 +1045,16 @@
                                     passport_num: updatedData[17],
                                     uid: updatedData[18],
                                     previously_insured: updatedData[19],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
-                                                Add_health_temp_id:addHealthTempId
+                                    Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1577,7 +1069,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1589,15 +1081,16 @@
                                     emirates_id: updatedData[16],
                                     passport_num: updatedData[17],
                                     uid: updatedData[18],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
-                                                Add_health_temp_id:addHealthTempId
+                                    Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1612,7 +1105,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1622,8 +1115,9 @@
                                     mobile: updatedData[14],
                                     email: updatedData[15],
                                     national_id: updatedData[16],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
@@ -1631,7 +1125,7 @@
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1646,7 +1140,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1659,15 +1153,16 @@
                                     iqama_id: updatedData[17],
                                     iqama_expire_at: updatedData[18],
                                     sponsor_id: updatedData[19],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1682,7 +1177,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1692,15 +1187,16 @@
                                     mobile: updatedData[14],
                                     email: updatedData[15],
                                     kuwait_id : updatedData[16],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1715,7 +1211,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1725,15 +1221,16 @@
                                     mobile: updatedData[14],
                                     email: updatedData[15],
                                     qatar_id: updatedData[16],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                             break;
@@ -1748,7 +1245,7 @@
                                     second_name: updatedData[4],
                                     last_name: updatedData[5],
                                     relation: updatedData[6],
-                                    dob: "2020-01-19 03:14:07",
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                     gender: updatedData[8],
                                     nationality: updatedData[9],
                                     marital_status: updatedData[10],
@@ -1757,41 +1254,22 @@
                                     grade: updatedData[13],
                                     mobile: updatedData[14],
                                     email: updatedData[15],
-                                    contact: contact.contact,
-                                    master: master,
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
                                     web_req_id:webReqId,
                                     Add_health_temp_id:addHealthTempId
                                 })
                                 var curHeaderArray=[]
                                 tableHeaderArray.forEach(function(headerCont,index){
                                     var category=categoriesArray[index]
-                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                    curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
                                 })
                                 dataArray.dataCategories.push(curHeaderArray)
                         }
                     })
-                    $.ajax({
-                        url: "{{ route('addAMember3') }}",
-                        type: "post",
-                        data:  {data:dataArray},
-                        success: function (res) {
-                            $("#smartwizard-arrows-primary").smartWizard("next");
-                            $(".content-step-3").html(res)
-                        },
-                        error: function(xhr, status, error) {
-                            alert('Something went wrong')
-                            console.log(xhr.responseText);
-                        }
-                    });
-            })
-        }, 1000);
-            $("#confirmNo").click(function(){
-                var dataDB=table2array( "validtable" )
-                if(dataDB.length>1){
-                    var addHealthTempId=0;
-                    var dataArray={master:master,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
                     
-                    cor = cor.toUpperCase()
+                    
                     dataDB.forEach(function(updatedData,rowIndex){
                         var tableHeaderArray=dataDB[0].slice(Math.max(updatedData.length - policiesLength, 0))
                         if(rowIndex!=0){
@@ -1800,9 +1278,9 @@
                             var curHeaderArray=[]
                             tableHeaderArray.forEach(function(headerCont,index){
                                 var category=categoriesArray[index]
-                                curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId}
+                                curHeaderArray= {policy_id: headerCont,cat: category,Add_health_temp_id:addHealthTempId,web_req_id:webReqId,person_id:client_contact_id}
+                                dataArray.dataValidCategories.push(curHeaderArray)
                             })
-                            dataArray.dataValidCategories.push(curHeaderArray)
                             switch (cor) {
                                 case 'DUBAI':
                                 case 'DUBAI LSB':
@@ -1814,7 +1292,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1837,8 +1315,9 @@
                                         commission: updatedData[27],
                                         entity_contact_number: updatedData[28],
                                         entity_email_id: updatedData[29],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1852,7 +1331,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1865,8 +1344,9 @@
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
                                         previously_insured: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                                     Add_health_temp_id:addHealthTempId
                                     })
@@ -1880,7 +1360,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1892,8 +1372,9 @@
                                         emirates_id: updatedData[16],
                                         passport_num: updatedData[17],
                                         uid: updatedData[18],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                                     Add_health_temp_id:addHealthTempId
                                     })
@@ -1907,7 +1388,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1917,8 +1398,9 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         national_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1932,7 +1414,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1945,8 +1427,9 @@
                                         iqama_id: updatedData[17],
                                         iqama_expire_at: updatedData[18],
                                         sponsor_id: updatedData[19],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1960,7 +1443,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1970,8 +1453,9 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         kuwait_id : updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -1985,7 +1469,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -1995,14 +1479,15 @@
                                         mobile: updatedData[14],
                                         email: updatedData[15],
                                         qatar_id: updatedData[16],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
                                 break;
                                 default:
-                                    dataArray.dataInvalid.push({
+                                    dataArray.dataValid.push({
                                         company_name: updatedData[0],
                                         s_department: updatedData[1],
                                         employee_staff_id: updatedData[2],
@@ -2010,7 +1495,7 @@
                                         second_name: updatedData[4],
                                         last_name: updatedData[5],
                                         relation: updatedData[6],
-                                        dob: "2020-01-19 03:14:07",
+                                        dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
                                         gender: updatedData[8],
                                         nationality: updatedData[9],
                                         marital_status: updatedData[10],
@@ -2019,8 +1504,9 @@
                                         grade: updatedData[13],
                                         mobile: updatedData[14],
                                         email: updatedData[15],
-                                        contact: contact.contact,
-                                        master: master,
+                                        client_contact_name: contact.client_contact_name,
+                                        client_contact_id: client_contact_id,
+                                        master_account: master_account,
                                         web_req_id:webReqId,
                                         Add_health_temp_id:addHealthTempId
                                     })
@@ -2040,9 +1526,274 @@
                             console.log(xhr.responseText);
                         }
                     });
-                }
-                $('#confirmationDialog').modal('hide')
             })
+        }, 1000);
+        $("#confirmNo").click(function(){
+            var dataDB=table2array( "validtable" )
+            if(dataDB.length>1){
+                var addHealthTempId=0;
+                var dataArray={master_account:master_account,cor:cor,web_req_id:webReqId,dataValid:[],dataInvalid:[],dataCategories:[],dataValidCategories:[]};
+                
+                cor = cor.toUpperCase()
+                dataDB.forEach(function(updatedData,rowIndex){
+                    var tableHeaderArray=dataDB[0].slice(Math.max(updatedData.length - policiesLength, 0))
+                    if(rowIndex!=0){
+                        addHealthTempId++;
+                        var categoriesArray=updatedData.slice(Math.max(updatedData.length - policiesLength, 0))
+                        var curHeaderArray=[]
+                        tableHeaderArray.forEach(function(headerCont,index){
+                            var category=categoriesArray[index]
+                            curHeaderArray= {policy_id: headerCont,cat: category,web_req_id:webReqId,Add_health_temp_id:addHealthTempId,person_id:client_contact_id}
+                        })
+                        dataArray.dataValidCategories.push(curHeaderArray)
+                        switch (cor) {
+                            case 'DUBAI':
+                            case 'DUBAI LSB':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    gdrfa_file_number: updatedData[19],
+                                    emirate_of_visa_issuance: updatedData[20],
+                                    member_type: updatedData[21],
+                                    entity_type: updatedData[22],
+                                    establishment_id: updatedData[23],
+                                    residential_location: updatedData[24],
+                                    work_location: updatedData[25],
+                                    employees_salary_bracket: updatedData[26],
+                                    commission: updatedData[27],
+                                    entity_contact_number: updatedData[28],
+                                    entity_email_id: updatedData[29],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'AUH':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    previously_insured: updatedData[19],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                                Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'OTHER EMIRATES':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    emirates_id: updatedData[16],
+                                    passport_num: updatedData[17],
+                                    uid: updatedData[18],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                                Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'JORDAN':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    national_id: updatedData[16],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'KSA':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    saudi_id: updatedData[16],
+                                    iqama_id: updatedData[17],
+                                    iqama_expire_at: updatedData[18],
+                                    sponsor_id: updatedData[19],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'KUWAIT':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    kuwait_id : updatedData[16],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            case 'QATAR':
+                                dataArray.dataValid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    qatar_id: updatedData[16],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                            break;
+                            default:
+                                dataArray.dataInvalid.push({
+                                    company_name: updatedData[0],
+                                    s_department: updatedData[1],
+                                    employee_staff_id: updatedData[2],
+                                    first_name: updatedData[3],
+                                    second_name: updatedData[4],
+                                    last_name: updatedData[5],
+                                    relation: updatedData[6],
+                                    dob: moment(updatedData[7],"DD/MM/YYYY").format("YYYY-MM-DD"),
+                                    gender: updatedData[8],
+                                    nationality: updatedData[9],
+                                    marital_status: updatedData[10],
+                                    cost_sharing: updatedData[11],
+                                    position: updatedData[12],
+                                    grade: updatedData[13],
+                                    mobile: updatedData[14],
+                                    email: updatedData[15],
+                                    client_contact_name: contact.client_contact_name,
+                                    client_contact_id: client_contact_id,
+                                    master_account: master_account,
+                                    web_req_id:webReqId,
+                                    Add_health_temp_id:addHealthTempId
+                                })
+                        }
+                    }
+                })
+                $.ajax({
+                    url: "{{ route('addAMember3') }}",
+                    type: "post",
+                    data:  {data:dataArray},
+                    success: function (res) {
+                        $("#smartwizard-arrows-primary").smartWizard("next");
+                        $(".content-step-3").html(res)
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Something went wrong')
+                        console.log(xhr.responseText);
+                    }
+                });
+            }
+            $('#confirmationDialog').modal('hide')
+        })
 
     })
     function table2array( jTable ) {

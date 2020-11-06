@@ -2,6 +2,7 @@
 
 const { validateAll } = use("Validator");
 const User = use("App/Models/User");
+const Database = use("Database");
 const randomString = use("random-string");
 const Mail = use("Mail");
 const speakeasy = use("speakeasy");
@@ -27,7 +28,7 @@ class RegisterController {
     /////validation for [unique phonenumber] and [not cancelled] START
     const uniquePhoneNumbCount = await User.query()
       .where("phonenumber", request.input("phonenumber"))
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .count("* as total");
     if (uniquePhoneNumbCount[0].total != 0) {
       if (validation.fails() == false) {
@@ -54,7 +55,6 @@ class RegisterController {
       phonenumber: request.input("phonenumber"),
     };
     session.put("register1Data", register1Data);
-    //TWILIO OTP START
     await client.verify
       .services(Env.get("TWILIO_SERVICE_ID"))
       .verifications.create({
@@ -62,13 +62,22 @@ class RegisterController {
         channel: "sms",
       })
       .then((data) => {
-        //check how to return a success and errors on twilio
         console.log("registerController", data);
-        //return data;
+        return response.redirect("/register2");
+      })
+      .catch((e) => {
+        session.flash({
+          alert: {
+            type: "error",
+            message: e.message,
+          },
+        });
+        console.error("Got an error:", e.code, e.message);
+        return response.redirect("/register3");
+        return response.redirect("back");
       });
+
     //TWILIO OTP END
-    return response.redirect("/register2");
-    //}
   }
 
   showRegister2({ session, view }) {
@@ -112,6 +121,7 @@ class RegisterController {
   }
 
   showRegister3({ session, view }) {
+    return view.render("auth.register.register3"); //to be removed when twilio
     const register2Data = session.get("register2Data");
     if (register2Data) {
       return view.render("auth.register.register3");
@@ -140,7 +150,7 @@ class RegisterController {
     /////validation for [unique email] and [not cancelled] START
     const uniqueEmailCount = await User.query()
       .where("email", request.input("email"))
-      .where("is_canceled", 0)
+      .whereNot("accstatus", 3)
       .count("* as total");
     if (uniqueEmailCount[0].total != 0) {
       if (validation.fails() == false) {
@@ -169,21 +179,20 @@ class RegisterController {
     console.log(request.input("password"));
     //create use('Route')
     const user = await User.create(userData);
-    // send confirmation email
+    // send confirmation emailg
     sgMail.setApiKey(Env.get("SENDGRID_API_KEY"));
     const msg = {
-      //to: request.input("email"),
       to: userData["email"],
       from: Env.get("SENDGRID_EMAIL_FROM"),
-      subject: "You Clover account is activated",
-      html:
-        "<p>Hi " +
-        userData["firstname"] +
-        "</p><p>Welcome To Clover,<br/><br/>Please confirm your email address by clicking the link below</p><p><a href='" +
-        Env.get("APP_URL") +
-        "/register/confirm/" +
-        userData["confirmation_token"] +
-        "'>Confirm email address</a>",
+      subject: "Activate your Clover account",
+      templateId: "56b0163c-8faf-4951-af12-e0a39d75670c",
+      substitutions: {
+        name: userData["firstname"],
+        urlToConfirm:
+          Env.get("APP_URL") +
+          "/register/confirm/" +
+          userData["confirmation_token"],
+      },
     };
     sgMail
       .send(msg)
@@ -192,7 +201,7 @@ class RegisterController {
       })
       .catch((error) => {
         const flashMessage = error.response.body;
-        console.log("RegisterController", error.response.body);
+        console.log("RegisteredListController", error.response.body);
       });
     return response.redirect("register4");
   }
@@ -210,6 +219,7 @@ class RegisterController {
   async confirmEmail({ params, session, response }) {
     //get user with the confirmation token
     const user = await User.findBy("confirmation_token", params.token);
+    session.put("userEmail", user.email);
 
     //set confirmation to null and is_active to true
     user.confirmation_token = null;
@@ -217,6 +227,12 @@ class RegisterController {
 
     //persist user to database
     await user.save();
+    let today = new Date().toLocaleDateString();
+    const accStatusHistory = await Database.table("acc_status_history").insert({
+      user_id: user.id,
+      acc_status: 1,
+      date_update: today,
+    });
 
     //display  success message
     session.flash({

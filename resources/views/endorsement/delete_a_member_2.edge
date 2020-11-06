@@ -5,26 +5,27 @@
                 <tr>
                     <th>Relation</th>
                     <th>Full Name</th>
-                    <th>Policy</th>
-                    <th>Category</th>
+                    <th>DOB</th>
                     <th>Company Name</th>
-                    <td></td>
+                    <th></th>
                     <th style="width:250px">Reason to delete</th>
 
                 </tr>
             </thead>
             <tbody>
                 @each(memberFromCensus in allMembersFromCensus)
-                @if(memberFromCensus.id==memberFromCensus.principal_id)
-                <tr class="principal" data-principal="{{memberFromCensus.id}}" id="{{memberFromCensus.id}}">
+                @if(memberFromCensus.relation=="1= PRINCIPAL")
+                <tr class="principal principal_{{memberFromCensus.staff_id}}"
+                    data-principal="{{memberFromCensus.staff_id}}" data-fname="{{memberFromCensus.first_name}}"
+                    data-lname="{{memberFromCensus.last_name}}" id="principal_{{memberFromCensus.staff_id}}">
                     @else
-                <tr class="dependent_{{memberFromCensus.principal_id}}"
-                    data-principal="{{memberFromCensus.principal_id}}" id="{{memberFromCensus.id}}">
+                <tr class="dependent dependent_{{memberFromCensus.staff_id}}"
+                    data-principal="{{memberFromCensus.staff_id}}" data-fname="{{memberFromCensus.first_name}}"
+                    data-lname="{{memberFromCensus.last_name}}" id="dependent_{{memberFromCensus.staff_id}}">
                     @endif
                     <td class="relation">{{memberFromCensus.relation}}</td>
                     <td class="full_name">{{memberFromCensus.first_name}} {{memberFromCensus.last_name}}</td>
-                    <td class="policy">{{memberFromCensus.policy}}</td>
-                    <td class="category">{{memberFromCensus.category}}</td>
+                    <td class="policy">{{memberFromCensus.dob}}</td>
                     <td class="company_name">{{memberFromCensus.company_name}}</td>
                     <td></td>
                     <td class="reason">&nbsp;
@@ -42,14 +43,14 @@
 		$("#datatables_step2").DataTable({
             columnDefs: [ {
                 className: 'select-checkbox',
-                targets:5
+                targets:4
             }, {
                 width: '250px',
-                targets:6
+                targets:5
             }],
             select: {
                 style: "multi",
-                selector: 'td:nth-child(6)'
+                selector: 'td:nth-child(5)'
             },
             "autoWidth": false,
             "ordering": false
@@ -61,17 +62,18 @@
             var countAllDependent=$(row).siblings(".dependent_"+principalId).length;
             var countCheckedDependent=$(row).siblings(".selected.dependent_"+principalId).length;
             var countUncheckedDependent=$(row).siblings(".dependent_"+principalId+":not(.selected)").length;
-            if ($(row).hasClass("principal")) {
-                if ($(row).hasClass("selected")){
-                    $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeIn()
-                }else{
-                    if(countUncheckedDependent==0) $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeOut()
-                }
-            }
-            else {
-                if ($(row).hasClass("selected")) {
+
+            if ($(row).hasClass("selected")){
+                if ($(row).hasClass("dependent")) {
+                    $(row).siblings(".principal_"+principalId).removeClass("selected");
                     $(row).find("textarea").fadeOut()
                     $(row).siblings(".selected.dependent_"+principalId).find("textarea").fadeIn()
+                }
+
+            }else{
+                if ($(row).hasClass("principal")) {
+                    $(row).siblings(".dependent_"+principalId).addClass("selected");
+                    $(".dependent_"+principalId).find("textarea").fadeOut()
                 }else{
                     if(countAllDependent==countCheckedDependent){
                         $(row).parent().children(".dependent_"+principalId).find("textarea").fadeOut()
@@ -81,7 +83,7 @@
                     if($("#"+principalId).hasClass("selected")==false){
                         $("#"+principalId).addClass("selected")
                     }
-                };
+                }
             }
         });
     })

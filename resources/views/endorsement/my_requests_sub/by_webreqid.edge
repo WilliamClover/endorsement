@@ -1,0 +1,31 @@
+@each(webReqId in webReqIdsDb)
+<div class="card mb-1">
+    <div class="card-header" data-toggle="collapse" data-target="#myOngoingRequests_{{webReqId.web_req_id}}"
+        aria-expanded="true" aria-controls="myOngoingRequests_{{webReqId.web_req_id}}">
+        <h5 class="card-title mb-0"><strong>Web Request Id:</strong> {{webReqId.web_req_id}}</h5>
+        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
+        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+
+    </div>
+    <div id="myOngoingRequests_{{webReqId.web_req_id}}" class="collapse" aria-labelledby="headingOne"
+        data-parent="#myOngoingRequests">
+        <div class="row">
+            <div class="col-12">
+                <table class="table">
+                    <tbody>
+                        @each(endorsement in endorsIdFromAddDb)
+                        @if(endorsement.web_req_id== $parent.webReqId.web_req_id)
+                        <tr>
+                            <td>Endorsement Id: <a href="javascript:openDetails({{endorsement.endorsement_id}})">
+                                    {{endorsement.endorsement_id}}</a></td>
+                            <td class="dateFormat">{{endorsement.date}}</td>
+                        </tr>
+                        @endif
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endeach

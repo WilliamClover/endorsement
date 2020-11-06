@@ -1,0 +1,16 @@
+@layout('layout.app')
+@section('content')
+
+<div id="loader">
+    <div class="text-center w-100">
+        <div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
+    </div>
+</div>
+@endsection
+
+
+@section('javascript')
+<script>
+    setInterval(() => window.location = "/endorsement/myRequests", 3000);
+</script>
+@endsection

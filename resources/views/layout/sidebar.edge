@@ -4,14 +4,14 @@
     </li>
     <li class="sidebar-item">
         <a href="/" class="sidebar-link ">
-            <i class="align-middle" data-feather="layout"></i> <span class="align-middle">Dashboard</span>
+            <i class="align-middle icon-basic-world"></i> <span class="align-middle">Dashboard</span>
         </a>
     </li>
 
     @if(auth.user.is_admin==1)
     <li class="sidebar-item">
         <a href="#administrator" data-toggle="collapse" class="sidebar-link collapsed">
-            <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Administrator</span>
+            <i class="align-middle icon-basic-case"></i> <span class="align-middle">Administrator</span>
         </a>
         <ul id="administrator" class="sidebar-dropdown list-unstyled collapse" data-parent="#sidebar">
             <li class="sidebar-item"><a class="sidebar-link" href="/admin/registered">Registered Users</a>
@@ -20,9 +20,16 @@
     </li>
     @endif
 
+
+    <li class="sidebar-item">
+        <a href="javascript:;" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle icon-ecommerce-sales"></i> <span class="align-middle">Special Offers</span>
+        </a>
+    </li>
     <li class="sidebar-item">
         <a href="#endorsement" data-toggle="collapse" class="sidebar-link collapsed">
-            <i class="align-middle" data-feather="check-square"></i> <span class="align-middle">Endorsement</span>
+            <i class="align-middle icon-basic-mail-open-text"></i> <span class="align-middle">Endorse Your
+                Policies</span>
         </a>
         <ul id="endorsement" class="sidebar-dropdown list-unstyled collapse" data-parent="#sidebar">
             <li class="sidebar-item"><a class="sidebar-link" href="/endorsement/myPolicies">My List of Policies</a>
@@ -35,7 +42,24 @@
             </li>
         </ul>
     </li>
-
+    <li class="sidebar-item">
+        <a href="javascript:;" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle icon-ecommerce-banknotes"></i> <span class="align-middle">Check Your
+                Financials</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="javascript:;" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle icon-basic-todolist-pencil"></i> <span class="align-middle">Submit/View your
+                Claims</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="javascript:;" data-toggle="collapse" class="sidebar-link collapsed">
+            <i class="align-middle icon-basic-helm"></i> <span class="align-middle">Explore Your
+                Policies</span>
+        </a>
+    </li>
 </ul>
 <div class="sidebar-bottom d-none d-lg-block">
     <div class="media">

@@ -1,168 +1,340 @@
 @layout('layout.app')
 @section('content')
+<style>
+    .tabsLinks {
+        position: relative;
+        z-index: 100;
+    }
+
+    .tabsLinks a {
+        background: #fff;
+        display: inline-block;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.2rem;
+        color: #000;
+    }
+
+    .tabsLinks a.current {
+        border-bottom: 0;
+    }
+
+    .tabsContainer {
+        margin-top: -18px;
+        z-index: 10;
+    }
+
+    .accordion>.card {
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
 <div id="requestsContainer">
     <h1 class="h3 mb-3">Ongoing Requests</h1>
+    <div class="mb-3 tabsLinks">
+        <a href="javascript:openByPolicy();" class="current">By Policy</a>
+        <a href="javascript:openByWebReqId();">By Web Request Id</a>
+    </div>
+    <div class="row mb-5 tabsContainer">
+        <div class="col-12 col-lg-4">
+            <div class="accordion" id="myOngoingRequests">
+
+            </div>
+        </div>
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-body" id="requestsDetails">
+                    <h6 class="text-center"><em>Member requests details will appear here!</em></h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h1 class="h3 mb-3">My FTP Ongoing Requests</h1>
+            <div class="card">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Relation</th>
+                            <th scope="col">Mobile</th>
+                            <th scope="col">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @each(ongoingFtpRequest in ongoingFtpRequests)
+                        <tr>
+                            <td>{{ongoingFtpRequest.company_name}}</td>
+                            <td>{{ongoingFtpRequest.first_name}} {{ongoingFtpRequest.last_name}}</td>
+                            <td>{{ongoingFtpRequest.relation}}</td>
+                            <td>{{ongoingFtpRequest.mobile}}</td>
+                            <td>{{ongoingFtpRequest.email}}</td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h1 class="h3 mb-3">My FTP Invalid Requests</h1>
+            <div class="card">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company Name</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Relation</th>
+                            <th scope="col">Mobile</th>
+                            <th scope="col">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @each(invalidFtpRequest in invalidFtpRequests)
+                        <tr>
+                            <td>{{invalidFtpRequest.company_name}}</td>
+                            <td>{{invalidFtpRequest.first_name}} {{invalidFtpRequest.last_name}}</td>
+                            <td>{{invalidFtpRequest.relation}}</td>
+                            <td>{{invalidFtpRequest.mobile}}</td>
+                            <td>{{invalidFtpRequest.email}}</td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3">My Invalid Added Members</h1>
     <div class="row mb-5">
         <div class="col-12">
-            <div class="accordion" id="myPendingRequests">
-                @each(webReqId in webReqIdDbOngoing)
-                <div class="card mb-1">
-                    <div class="card-header" data-toggle="collapse"
-                        data-target="#myPendingRequests{{webReqId.web_req_id}}" aria-expanded="true"
-                        aria-controls="myPendingRequests{{webReqId.web_req_id}}">
-                        <h5 class="card-title mb-0">{{webReqId.web_req_id}} &nbsp;- &nbsp; 17 June 2020</h5>
-                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
+            <div class="card">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Relation</th>
+                            <th scope="col">Mobile</th>
+                            <th scope="col">Email</th>
+                            <th scope="col" width="150"></th>
+                            <th scope="col" width="200"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                    </div>
-                    <div id="myPendingRequests{{webReqId.web_req_id}}" class="collapse" aria-labelledby="headingOne"
-                        data-parent="#myPendingRequests">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="accordion mx-auto" id="myPendingRequestsSub" style="width:95%">
+                        @each(invalidRequest in invalidRequests)
+                        <tr>
+                            <td>{{invalidRequest.first_name}} {{invalidRequest.last_name}}</td>
+                            <td>{{invalidRequest.relation}}</td>
+                            <td>{{invalidRequest.mobile}}</td>
+                            <td>{{invalidRequest.email}}</td>
+                            <td>
+                                <form action="{{ route('resubmitRejectedPerson') }}" method="post">
+                                    <input type="hidden" name="web_req_id" value="{{rejectedPerson.web_req_id}}" />
+                                    <input type="hidden" name="Add_health_temp_id"
+                                        value="{{rejectedPerson.Add_health_temp_id}}" />
+                                    <input type="hidden" name="policy_id" value="{{rejectedPerson.policy_id}}" />
+                                    <input type="hidden" name="reason" value="{{rejectedPerson.reason}}" />
+                                    <button class="btn btn-success resubmitRejectedPerson" type="submit"><i
+                                            class="fas fa-check"></i>
+                                        Resubmit</button>
+                                </form>
 
-                                    @set('x', '')
-                                    @each(policyId in policyOngoingIdDb)
-                                    @if(policyId.web_req_id === $parent.webReqId.web_req_id)
-                                    @if(x != policyId.policy_id)
-                                    @set('x', policyId.policy_id)
-                                    <div class="card accSub">
-                                        <div class="card-header collapsed" data-toggle="collapse"
-                                            data-target="#myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
-                                            aria-expanded="true"
-                                            aria-controls="myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}">
-                                            <h5 class="card-title mb-0"><span
-                                                    class="badge badge-warning">Waiting&nbsp;Approval</span>&nbsp;&nbsp;{{policyId.policy_id}}
-                                                &nbsp;- &nbsp; PSE33455
 
-                                            </h5>
-                                            <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                                            <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
-
-                                        </div>
-                                        <div id="myPendingRequests_{{$parent.webReqId.web_req_id}}_{{policyId.Add_health_temp_id}}"
-                                            class="collapse" aria-labelledby="headingOne"
-                                            data-parent="#myPendingRequestsSub">
-                                            <table id="datatables-clients" class="table table-striped table-bordered"
-                                                style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Full Name</th>
-                                                        <th>Company name</th>
-                                                        <th>Employee ID</th>
-                                                        <th>Gender</th>
-                                                        <th>DOB</th>
-                                                        <th>Relation</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @each(ongoingRequest in ongoingRequests)
-                                                    @if(ongoingRequest.web_req_id===$parent.policyId.web_req_id)
-                                                    <tr>
-                                                        <td>{{ongoingRequest.first_name}} {{ongoingRequest.last_name}}
-                                                        </td>
-                                                        <th>{{ongoingRequest.company_name}}</th>
-                                                        <td>{{ongoingRequest.employee_staff_id}}</td>
-                                                        <td>{{ongoingRequest.gender}}</td>
-                                                        <td class="dateFormat">{{ongoingRequest.dob}}</td>
-                                                        <th>{{ongoingRequest.relation}}</th>
-                                                    </tr>
-                                                    @endif
-                                                    @endeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    @endif
-                                    @endif
-                                    @endeach
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endeach
+                            </td>
+                            <td><button class="btn btn-danger deleteRejectedPerson"
+                                    data-webreqid="{{rejectedPerson.web_req_id}}"
+                                    data-addhealthtempid="{{rejectedPerson.Add_health_temp_id}}"><i
+                                        class="fas fa-times"></i> Delete
+                                    forever</button>
+                            </td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <h1 class="h3 mb-3">My Rejected Members</h1>
-    <div class="row">
+    <div class="row mb-5">
         <div class="col-12">
-            <div class="accordion" id="myRejectedRequests">
-                <div class="card mb-4">
-                    <div class="card-header collapsed" data-toggle="collapse" data-target="#myRejectedRequests1"
-                        aria-expanded="true" aria-controls="myRejectedRequests1">
-                        <h5 class="card-title mb-0">Azadea Dubai</h5>
-                        <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
-                        <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
-                    </div>
-                    <div id="myRejectedRequests1" class="collapse" aria-labelledby="headingOne"
-                        data-parent="#myRejectedRequests">
-                        <table class="table mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Policy ID</th>
-                                    <th scope="col">Full Name</th>
-                                    <th scope="col">LOB</th>
-                                    <th scope="col">Reason of rejection</th>
-                                    <th scope="col">Rejection date</th>
-                                    <th scope="col" width="150"></th>
-                                    <th scope="col" width="200"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
+            <div class="card">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Policy ID</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">LOB</th>
+                            <th scope="col">Reason of rejection</th>
+                            <th scope="col">Rejection date</th>
+                            <th scope="col" width="150"></th>
+                            <th scope="col" width="200"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                                @each(rejectedPerson in personDbRejected)
-                                <tr>
-                                    <td>{{rejectedPerson.policy_id}}</td>
-                                    <td>{{rejectedPerson.first_name}} {{rejectedPerson.last_name}}</td>
-                                    <td>Health</td>
-                                    <td>{{rejectedPerson.reason}}</td>
-                                    <td class="dateFormat">{{rejectedPerson.rejection_date}}</td>
-                                    <td>
-                                        <form action="{{ route('resubmitRejectedPerson') }}" method="post">
-                                            <input type="hidden" name="web_req_id"
-                                                value="{{rejectedPerson.web_req_id}}" />
-                                            <input type="hidden" name="Add_health_temp_id"
-                                                value="{{rejectedPerson.Add_health_temp_id}}" />
-                                            <input type="hidden" name="policy_id"
-                                                value="{{rejectedPerson.policy_id}}" />
-                                            <input type="hidden" name="reason" value="{{rejectedPerson.reason}}" />
-                                            <button class="btn btn-success resubmitRejectedPerson" type="submit"><i
-                                                    class="fas fa-check"></i>
-                                                Resubmit</button>
-                                        </form>
+                        @each(rejectedPerson in personDbRejected)
+                        <tr>
+                            <td>{{rejectedPerson.policy_id}}</td>
+                            <td>{{rejectedPerson.first_name}} {{rejectedPerson.last_name}}</td>
+                            <td>Health</td>
+                            <td>{{rejectedPerson.reason}}</td>
+                            <td class="dateFormat">{{rejectedPerson.rejection_date}}</td>
+                            <td>
+                                <form action="{{ route('resubmitRejectedPerson') }}" method="post">
+                                    <input type="hidden" name="web_req_id" value="{{rejectedPerson.web_req_id}}" />
+                                    <input type="hidden" name="Add_health_temp_id"
+                                        value="{{rejectedPerson.Add_health_temp_id}}" />
+                                    <input type="hidden" name="policy_id" value="{{rejectedPerson.policy_id}}" />
+                                    <input type="hidden" name="reason" value="{{rejectedPerson.reason}}" />
+                                    <button class="btn btn-success resubmitRejectedPerson" type="submit"><i
+                                            class="fas fa-check"></i>
+                                        Resubmit</button>
+                                </form>
 
 
-                                    </td>
-                                    <td><button class="btn btn-danger deleteRejectedPerson"
-                                            data-webreqid="{{rejectedPerson.web_req_id}}"
-                                            data-addhealthtempid="{{rejectedPerson.Add_health_temp_id}}"><i
-                                                class="fas fa-times"></i> Delete
-                                            forever</button>
-                                    </td>
-                                </tr>
-                                @endeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </td>
+                            <td><button class="btn btn-danger deleteRejectedPerson"
+                                    data-webreqid="{{rejectedPerson.web_req_id}}"
+                                    data-addhealthtempid="{{rejectedPerson.Add_health_temp_id}}"><i
+                                        class="fas fa-times"></i> Delete
+                                    forever</button>
+                            </td>
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3">My Rejected Deletions - <em class="small">(Rejected for none uploaded documents)</em></h1>
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Policy ID</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">LOB</th>
+                            <th scope="col">Rejection date</th>
+                            <!--  <th scope="col" width="150"></th>
+                            <th scope="col" width="200"></th>  -->
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @each(rejectedDeletion in deletionDbRejected)
+                        <tr>
+                            <td>{{rejectedDeletion.policy_id}}</td>
+                            <td>{{rejectedDeletion.first_name}} {{rejectedDeletion.last_name}}</td>
+                            <td>Health</td>
+                            <td class="dateFormat">{{rejectedDeletion.date_of_request}}</td>
+                            <!--  <td>
+                                <form action="{{ route('resubmitRejectedPerson') }}" method="post">
+                            <input type="hidden" name="web_req_id" value="{{rejectedDeletion.web_req_id}}" />
+                            <input type="hidden" name="Add_health_temp_id"
+                                value="{{rejectedDeletion.Add_health_temp_id}}" />
+                            <input type="hidden" name="policy_id" value="{{rejectedDeletion.policy_id}}" />
+                            <input type="hidden" name="reason" value="{{rejectedDeletion.reason}}" />
+                            <button class="btn btn-success resubmitRejectedPerson" type="submit"><i
+                                    class="fas fa-check"></i>
+                                Resubmit</button>
+                            </form>
+
+
+                            </td>
+                            <td><button class="btn btn-danger deleteRejectedPerson"
+                                    data-webreqid="{{rejectedDeletion.web_req_id}}"
+                            data-addhealthtempid="{{rejectedDeletion.Add_health_temp_id}}"><i class="fas fa-times"></i>
+                            Delete
+                            forever</button>
+                            </td> -->
+                        </tr>
+                        @endeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+@if(flashMessage('notification'))
+<div class="modal fade" id="showEndId" tabindex="-1" role="dialog" aria-labelledby="showEndIdLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ flashMessage('notification') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Web Request ID: {{webReqIdFromAddHealthTemp}}<br />
+                    Endorsement ID(s): {{endorsementIdFromAddHealthTemp}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok!</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
-
 @section('javascript')
-<script>
-    $(document).ready(function(){
-        $(".dateFormat").each(function() {
-        var dateNewFormat=moment($(this).text()).format("DD MMMM YYYY")
-            $(this).text(dateNewFormat)
+<script type="text/javascript">
+    $(window).on('load',function(){
+        $('#showEndId').modal('show');
+    });
+    let openByPolicy = function (){
+        $.ajax({
+            url: "{{ route('byPolicy') }}",
+            type: "get",
+            success: function (res) {
+                $(".tabsLinks > a").removeClass("current")
+                $(".tabsLinks > a:nth-Child(1)").addClass("current")
+                $("#myOngoingRequests").html(res)
+                $(".dateFormat").each(function() {
+                    var dateNewFormat=moment($(this).text()).format("DD MMM YYYY")
+                    $(this).text(dateNewFormat)
+                });
+
+            },
+            error: function(xhr, status, error) {
+                alert('Something went wrong')
+                console.log(xhr.responseText);
+            }
         });
+    }
+    let openByWebReqId = function (){
+        $.ajax({
+            url: "{{ route('byWebReqId') }}",
+            type: "get",
+            success: function (res) {
+                $(".tabsLinks > a").removeClass("current")
+                $(".tabsLinks > a:nth-Child(2)").addClass("current")
+                $("#myOngoingRequests").html(res)
+                $(".dateFormat").each(function() {
+                    var dateNewFormat=moment($(this).text()).format("DD MMM YYYY")
+                    $(this).text(dateNewFormat)
+                });
+
+            },
+            error: function(xhr, status, error) {
+                alert('Something went wrong')
+                console.log(xhr.responseText);
+            }
+        });
+    }
+    $(document).ready(function(){
+        openByPolicy()
+
+
         $(".deleteRejectedPerson").click(function(e){
             var dataArray=[]
             dataArray.push({
@@ -186,5 +358,16 @@
             
         })
     })
+function openDetails(endorsement_id){
+    $.post("{{ route('myRequestsDetails') }}",
+    {
+        section: "add",
+        endorsement_id:endorsement_id,
+        status:"ongoing"
+    },
+    function(data, status){
+        $("#requestsDetails").html(data)
+    });
+}
 </script>
 @endsection

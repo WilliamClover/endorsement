@@ -8,20 +8,20 @@
         <div class="col-12">
             @set('count', 1)
             @each(distinctContact in distinctContacts)
-            <div class="card mb-2">
-                <div class="card-header collapsed" data-toggle="collapse" data-target="#myPolicies{{count}}"
-                    aria-expanded="true" aria-controls="myPolicies{{count}}">
-                    <h5 class="card-title">{{distinctContact.master}}</h5>
+            <div class="card mb-4">
+                <div class="card-header" data-toggle="collapse" data-target="#myPolicies{{count}}" aria-expanded="true"
+                    aria-controls="myPolicies{{count}}" style="background-color:#dadada">
+                    <h5 class="card-title m-0 py-2">{{distinctContact.master_account}}</h5>
                     <!----  <h6 class="card-subtitle text-muted">This is Azadea Dubai, and this is a test text</h6>  -->
                     <i class="align-middle mr-2 fas fa-fw fa-angle-down"></i>
                     <i class="align-middle mr-2 fas fa-fw fa-angle-up"></i>
                 </div>
-                <div id="myPolicies{{count}}" class="collapse" aria-labelledby="headingOne" data-parent="#myPolicies">
+                <div id="myPolicies{{count}}" class="collapse show" aria-labelledby="headingOne"
+                    data-parent="#myPolicies">
                     <table class="table mb-0">
                         <thead>
                             <tr>
                                 <th scope="col">Policy Id</th>
-                                <th scope="col">Clover Entity</th>
                                 <!--<th scope="col">Policy Number</th>-->
                                 <th scope="col">LOB</th>
                                 <th scope="col">Supplier</th>
@@ -35,19 +35,18 @@
                         </thead>
                         <tbody>
                             @each(policy in policies)
-                            @if(policy.master===$parent.distinctContact.master)
+                            @if(policy.master_account===$parent.distinctContact.master_account)
                             <tr>
-                                <th scope="row">{{policy.policyid}}</th>
-                                <td>{{policy.pc}}</td>
+                                <th scope="row">{{policy.master_policy_clover_id}}</th>
                                 <!--<td>{{policy.policy}}</td>-->
                                 <td>{{policy.lob}}</td>
                                 <td>{{policy.supplier}}</td>
-                                <td>{{policy.country}}</td>
+                                <td>{{policy.cor}}</td>
                                 <!--<td>{{policy.subcat}}</td>-->
-                                <td>{{policy.ph}}</td>
+                                <td>{{policy.policyholder}}</td>
                                 <td>{{policy.currency}}</td>
-                                <td class="dateFormat">{{policy.effective}}</td>
-                                <td class="dateFormat">{{policy.expiry}}</td>
+                                <td class="dateFormat">{{policy.effective_date}}</td>
+                                <td class="dateFormat">{{policy.expiry_date}}</td>
                             </tr>
                             @endif
                             @endeach
@@ -66,10 +65,10 @@
 @section('javascript')
 <script>
     $(function() {
-    $(".dateFormat").each(function () {
-        var dateNewFormat = moment($(this).text()).format("DD MMMM YYYY");
-        $(this).text(dateNewFormat);
-    });
-})
+        $(".dateFormat").each(function () {
+            var dateNewFormat=moment($(this).text(),"MMM DD YYYY hh:mm a").format("DD MMM YYYY")
+            $(this).text(dateNewFormat);
+        });
+    })
 </script>
 @endsection

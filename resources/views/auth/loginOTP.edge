@@ -6,7 +6,7 @@
 <div class="card">
     <div class="card-body">
         <div class="m-sm-4">
-            <h6 class="text-left card-title mb-4">The OTP was just sent, please submit it below</h6>
+            <h6 class="text-left card-title mb-4">The OTP was just sent to {{hiddenPhoneNumber}}, please submit it below </h6>
             <form action="{{ route('verifyloginOTP') }}" method="post">
                 {{ csrfField() }}
                 <div class="form-group">
